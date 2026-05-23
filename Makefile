@@ -3,7 +3,7 @@ build: clean
 	#
 	# build
 	#
-	docker compose up --build | tee docker.log
+	docker compose up --build --exit-code-from demo-done | tee docker.log
 
 .PHONY: rebuild
 rebuild: clean
@@ -11,7 +11,7 @@ rebuild: clean
 	# rebuild
 	#
 	docker compose build --no-cache riak | tee build.log
-	docker compose up | tee docker.log
+	docker compose up --exit-code-from demo-done | tee docker.log
 
 .PHONY: clean
 clean:
