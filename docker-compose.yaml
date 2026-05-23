@@ -39,6 +39,17 @@ services:
       riak:
         condition: service_healthy
 
+  demo-done:
+    image: alpine:3.21
+    networks:
+      - riak-net
+    depends_on:
+      python-demo:
+        condition: service_completed_successfully
+      curl-demo:
+        condition: service_completed_successfully
+    command: ["echo", "All demos finished."]
+
 networks:
   riak-net:
     driver: bridge
