@@ -10,6 +10,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/app.jar ./app.jar
 
-ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -XX:TieredStopAtLevel=1"
+# Small heap and minimal JIT/GC for faster JVM startup in a short-lived demo container.
+ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -Xms32m -Xmx128m -XX:TieredStopAtLevel=1 -XX:+UseSerialGC"
 
 CMD ["java", "-jar", "app.jar"]
