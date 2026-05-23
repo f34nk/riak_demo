@@ -39,16 +39,77 @@ services:
       riak:
         condition: service_healthy
 
+  java-demo:
+    build:
+      context: services/java-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
+  rust-demo:
+    build:
+      context: services/rust-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
+  typescript-demo:
+    build:
+      context: services/typescript-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
+  elixir-demo:
+    build:
+      context: services/elixir-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
   demo-done:
     image: alpine:3.21
     networks:
       - riak-net
     depends_on:
+      riak:
+        condition: service_healthy
       python-demo:
         condition: service_completed_successfully
       curl-demo:
         condition: service_completed_successfully
-    command: ["echo", "All demos finished."]
+      java-demo:
+        condition: service_completed_successfully
+      rust-demo:
+        condition: service_completed_successfully
+      typescript-demo:
+        condition: service_completed_successfully
+      elixir-demo:
+        condition: service_completed_successfully
+    command:
+      - sh
+      - -c
+      - echo -e "\n\nAll demos finished.\n\n"
 
 networks:
   riak-net:
