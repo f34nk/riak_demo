@@ -2,10 +2,13 @@
 FROM erlang:28 AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
     git \
     make \
     libssl-dev \
     libncurses-dev \
+    libpam0g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 ARG RIAK_BRANCH=openriak-4.0
@@ -18,19 +21,23 @@ WORKDIR /build/riak
 RUN make rel
 
 # --- Runtime stage ---
-FROM debian:bookworm-slim
+# Must match builder glibc (erlang:28 is Debian trixie).
+FROM debian:trixie-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libncurses6 \
+    libgl1 \
+    libglu1-mesa \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /build/riak/rel/riak /opt/riak
 COPY riak.conf /opt/riak/etc/riak.conf
 COPY entrypoint.sh /entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
 
-RUN chmod +x /entrypoint.sh && \
+RUN chmod +x /entrypoint.sh /healthcheck.sh && \
     mkdir -p /var/lib/riak /var/log/riak
 
 EXPOSE 8087 8098 8099
@@ -40,6 +47,6 @@ HEALTHCHECK \
     --timeout=5s \
     --retries=30 \
     --start-period=90s \
-    CMD curl -sf http://localhost:8098/ping || exit 1
+    CMD /healthcheck.sh
 
 CMD ["/entrypoint.sh"]
