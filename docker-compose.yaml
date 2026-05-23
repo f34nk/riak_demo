@@ -1,0 +1,44 @@
+services:
+
+  riak:
+    build:
+      context: services/openriak
+    ports:
+      - "8098:8098"
+      - "8087:8087"
+    networks:
+      - riak-net
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8098/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  python-demo:
+    build:
+      context: services/python-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
+  curl-demo:
+    build:
+      context: services/curl-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
+networks:
+  riak-net:
+    driver: bridge
