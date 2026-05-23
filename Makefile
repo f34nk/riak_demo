@@ -1,9 +1,17 @@
+.PHONY: all
+all: 
+	time make build 2>build-errors.log
+	[ -s build-errors.log ] || rm -rf build-errors.log
+
 .PHONY: build
 build: clean
 	#
 	# build
 	#
-	docker compose up --build --abort-on-container-exit=false --exit-code-from demo-done | tee build.log
+	docker compose up --build -d
+	docker compose wait demo-done
+	docker compose logs
+	docker compose down
 
 .PHONY: rebuild
 rebuild: clean
@@ -11,7 +19,6 @@ rebuild: clean
 	# rebuild
 	#
 	docker compose build --no-cache riak | tee rebuild.log
-	docker compose up --abort-on-container-exit=false --exit-code-from demo-done | tee build.log
 
 .PHONY: clean
 clean:
