@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 import time
 
 import requests
@@ -17,46 +16,6 @@ TEST_OBJECT = {
     "message": "Hello from OpenRiak",
     "timestamp": time.time(),
 }
-
-
-def kv_vnodes_ready() -> bool:
-    url = f"{BASE_URL}/stats?timeout=2000"
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code != 200:
-            return False
-        stats = response.json()
-        running = stats.get("riak_kv_vnodes_running", 0)
-        partitions = stats.get("ring_num_partitions", 0)
-        return partitions > 0 and running >= partitions
-    except (requests.exceptions.RequestException, ValueError):
-        return False
-
-
-def wait_for_riak(retries: int = 60, delay: float = 2.0) -> None:
-    url = f"{BASE_URL}/ping"
-    for attempt in range(1, retries + 1):
-        try:
-            response = requests.get(url, timeout=3)
-            if response.status_code == 200:
-                break
-        except requests.exceptions.ConnectionError:
-            pass
-        print(f"Waiting for OpenRiak ... attempt {attempt}/{retries}")
-        time.sleep(delay)
-    else:
-        print("ERROR: OpenRiak did not become ready in time.", file=sys.stderr)
-        sys.exit(1)
-
-    for attempt in range(1, retries + 1):
-        if kv_vnodes_ready():
-            print(f"OpenRiak is ready ({url})")
-            return
-        print(f"Waiting for KV vnodes ... attempt {attempt}/{retries}")
-        time.sleep(delay)
-
-    print("ERROR: OpenRiak KV vnodes did not become ready in time.", file=sys.stderr)
-    sys.exit(1)
 
 
 def write_object(bucket: str, key: str, data: dict) -> None:
@@ -81,7 +40,7 @@ def read_object(bucket: str, key: str) -> dict:
 
 def main() -> None:
     print("=== OpenRiak Python Demo ===")
-    wait_for_riak()
+    print(f"Using OpenRiak at {BASE_URL}")
 
     write_object(BUCKET, KEY, TEST_OBJECT)
 
