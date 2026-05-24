@@ -5,7 +5,7 @@ All notable changes to this project will be documented here.
 
 ## 2026-05-24
 ### Added
-- Gleam HTTP client demo that writes and reads a JSON object from OpenRiak.
+- Gleam, Erlang client demos.
 
 ### Fixed
 - Demo build waits for completion by polling demo-done instead of compose wait, which failed after one-shot containers exited.
