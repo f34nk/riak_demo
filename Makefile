@@ -1,17 +1,19 @@
 .PHONY: all
-all: 
-	time make build 2>build-errors.log
-	[ -s build-errors.log ] || rm -rf build-errors.log
+all: clean build
 
 .PHONY: build
-build: clean
+build:
+	time $(MAKE) run 2>&1 | tee -i build.log
+
+.PHONY: run
+run:
 	#
 	# build
 	#
 	docker compose up --build -d
 	docker compose wait demo-done
 	docker compose logs
-	docker compose down
+	docker compose down -v --rmi local
 
 .PHONY: rebuild
 rebuild: clean
