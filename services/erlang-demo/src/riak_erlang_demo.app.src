@@ -1,0 +1,7 @@
+{application, riak_erlang_demo,
+ [{description, "OpenRiak Erlang HTTP client demo"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {riak_erlang_demo_app, []}},
+  {applications, [kernel, stdlib, hackney, jsone]},
+  {env, []}]}.
