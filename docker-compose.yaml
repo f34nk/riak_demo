@@ -99,6 +99,18 @@ services:
       riak:
         condition: service_healthy
 
+  erlang-demo:
+    build:
+      context: services/erlang-demo
+    networks:
+      - riak-net
+    environment:
+      - RIAK_HOST=riak
+      - RIAK_PORT=8098
+    depends_on:
+      riak:
+        condition: service_healthy
+
   demo-done:
     image: alpine:3.21
     networks:
@@ -119,6 +131,8 @@ services:
       elixir-demo:
         condition: service_completed_successfully
       gleam-demo:
+        condition: service_completed_successfully
+      erlang-demo:
         condition: service_completed_successfully
     command:
       - sh
