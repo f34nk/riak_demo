@@ -287,20 +287,22 @@ operation StreamDefaultKeys {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 200)
 operation GetObject {
     input: GetObjectInput
     output: ObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "HEAD", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 200)
 operation HeadObject {
     input: HeadObjectInput
     output: HeadObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @idempotent
@@ -355,20 +357,22 @@ operation DeleteObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "GET", uri: "/buckets/{bucket}/keys/{key}", code: 200)
 operation GetDefaultObject {
     input: GetDefaultObjectInput
     output: ObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "HEAD", uri: "/buckets/{bucket}/keys/{key}", code: 200)
 operation HeadDefaultObject {
     input: HeadDefaultObjectInput
     output: HeadObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @idempotent
@@ -423,20 +427,22 @@ operation DeleteDefaultObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "GET", uri: "/riak/{bucket}/{key}", code: 200)
 operation GetLegacyObject {
     input: GetDefaultObjectInput
     output: ObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "HEAD", uri: "/riak/{bucket}/{key}", code: 200)
 operation HeadLegacyObject {
     input: HeadDefaultObjectInput
     output: HeadObjectOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @idempotent
@@ -1019,6 +1025,7 @@ structure DeleteOptions with [TimeoutOption] {
     dw: Quorum
 }
 
+@documentation("Accept drives sibling resolution: multipart/mixed returns all siblings at 200; other values may yield 300 with a vtag list when siblings are unresolved.")
 @mixin
 structure ConditionalReadHeaders {
     @httpHeader("Accept")
@@ -1856,6 +1863,21 @@ structure ConflictError {
 @httpError(410)
 structure GoneError {
     message: String
+}
+
+@error("client")
+@httpError(300)
+structure MultipleChoicesError {
+    message: String
+
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
+    @httpHeader("X-Riak-Vclock")
+    vclock: VClock
+
+    @httpPayload
+    body: String
 }
 
 @error("client")
