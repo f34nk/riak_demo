@@ -1,5 +1,5 @@
 # --- Build stage ---
-FROM erlang:28 AS builder
+FROM erlang:26 AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpam0g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-ARG RIAK_BRANCH=openriak-4.0
+ARG RIAK_BRANCH=openriak-3.4
 
 RUN git clone --depth 1 --branch ${RIAK_BRANCH} \
     https://github.com/OpenRiak/riak.git /build/riak
@@ -21,8 +21,8 @@ WORKDIR /build/riak
 RUN make rel
 
 # --- Runtime stage ---
-# Must match builder glibc (erlang:28 is Debian trixie).
-FROM debian:trixie-slim
+# Must match builder glibc (erlang:26 is Debian bookworm).
+FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
