@@ -1000,6 +1000,9 @@ structure ObjectWriteOptions with [TimeoutOption] {
 
     @httpQuery("sync_on_write")
     syncOnWrite: SyncOnWrite
+
+    @httpQuery("asis")
+    asis: Boolean
 }
 
 @mixin
