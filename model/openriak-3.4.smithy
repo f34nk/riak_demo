@@ -20,12 +20,15 @@ use smithy.api#required
 use smithy.api#streaming
 use smithy.api#Document
 use smithy.api#documentation
+use smithy.api#httpBasicAuth
 use smithy.api#trait
 
 @trait(selector: "service")
 @protocolDefinition
 structure openRiakHttp {}
 
+@documentation("OpenRiak uses HTTP Basic authentication. A 401 response includes a WWW-Authenticate challenge when credentials are missing or invalid. Sending credentials over plain HTTP may yield 426 Upgrade Required.")
+@httpBasicAuth
 @openRiakHttp
 service OpenRiak {
     version: "2026-05-06"
@@ -178,6 +181,7 @@ operation SetBucketTypeProperties {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for bucket enumeration.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets?buckets=true", code: 200)
 operation ListBuckets {
     input: ListBucketsInput
@@ -186,6 +190,7 @@ operation ListBuckets {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for bucket enumeration.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets?buckets=stream", code: 200)
 operation StreamBuckets {
     input: ListBucketsInput
@@ -194,6 +199,7 @@ operation StreamBuckets {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for bucket enumeration.")
 @http(method: "GET", uri: "/buckets?buckets=true", code: 200)
 operation ListDefaultBuckets {
     input: TimeoutInput
@@ -202,6 +208,7 @@ operation ListDefaultBuckets {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for bucket enumeration.")
 @http(method: "GET", uri: "/buckets?buckets=stream", code: 200)
 operation StreamDefaultBuckets {
     input: TimeoutInput
@@ -260,6 +267,7 @@ operation ResetDefaultBucketProperties {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for key enumeration.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/keys?keys=true", code: 200)
 operation ListKeys {
     input: ListKeysInput
@@ -268,6 +276,7 @@ operation ListKeys {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for key enumeration.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/keys?keys=stream", code: 200)
 operation StreamKeys {
     input: ListKeysInput
@@ -276,6 +285,7 @@ operation StreamKeys {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for key enumeration.")
 @http(method: "GET", uri: "/buckets/{bucket}/keys?keys=true", code: 200)
 operation ListDefaultKeys {
     input: ListDefaultKeysInput
@@ -284,6 +294,7 @@ operation ListDefaultKeys {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API or AAE folds for key enumeration.")
 @http(method: "GET", uri: "/buckets/{bucket}/keys?keys=stream", code: 200)
 operation StreamDefaultKeys {
     input: ListDefaultKeysInput
@@ -431,7 +442,7 @@ operation DeleteDefaultObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4. When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "GET", uri: "/riak/{bucket}/{key}", code: 200)
 operation GetLegacyObject {
@@ -440,7 +451,7 @@ operation GetLegacyObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@documentation("When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4. When siblings exist and no vtag is given, the server may respond with 300 Multiple Choices and a text body listing vtags. Send Accept: multipart/mixed to receive all siblings in one body at 200.")
 @readonly
 @http(method: "HEAD", uri: "/riak/{bucket}/{key}", code: 200)
 operation HeadLegacyObject {
@@ -449,6 +460,7 @@ operation HeadLegacyObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, MultipleChoicesError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4.")
 @idempotent
 @http(method: "PUT", uri: "/riak/{bucket}/{key}", code: 204)
 operation PutLegacyObject {
@@ -457,6 +469,7 @@ operation PutLegacyObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4.")
 @idempotent
 @http(method: "PUT", uri: "/riak/{bucket}/{key}?returnbody=true", code: 200)
 operation PutLegacyObjectReturnBody {
@@ -465,6 +478,7 @@ operation PutLegacyObjectReturnBody {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4.")
 @http(method: "POST", uri: "/riak/{bucket}/{key}", code: 204)
 operation PostLegacyObject {
     input: PutDefaultObjectInput
@@ -472,6 +486,7 @@ operation PostLegacyObject {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4.")
 @http(method: "POST", uri: "/riak/{bucket}/{key}?returnbody=true", code: 200)
 operation PostLegacyObjectReturnBody {
     input: PutDefaultObjectInput
@@ -479,6 +494,7 @@ operation PostLegacyObjectReturnBody {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy /riak/ object API. Deprecated in docs but still served on openriak-3.4.")
 @idempotent
 @http(method: "DELETE", uri: "/riak/{bucket}/{key}", code: 204)
 operation DeleteLegacyObject {
@@ -488,6 +504,7 @@ operation DeleteLegacyObject {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}/{walk+}", code: 200)
 operation LinkWalk {
     input: LinkWalkInput
@@ -496,6 +513,7 @@ operation LinkWalk {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4.")
 @http(method: "GET", uri: "/buckets/{bucket}/keys/{key}/{walk+}", code: 200)
 operation LinkWalkDefault {
     input: LinkWalkDefaultInput
@@ -504,6 +522,7 @@ operation LinkWalkDefault {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4.")
 @http(method: "GET", uri: "/riak/{bucket}/{key}/{walk+}", code: 200)
 operation LinkWalkLegacy {
     input: LinkWalkDefaultInput
@@ -512,6 +531,7 @@ operation LinkWalkLegacy {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/index/{field}/{value}", code: 200)
 operation QuerySecondaryIndex {
     input: SecondaryIndexInput
@@ -520,6 +540,7 @@ operation QuerySecondaryIndex {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/index/{field}/{start}/{end}", code: 200)
 operation QuerySecondaryIndexRange {
     input: SecondaryIndexRangeInput
@@ -528,6 +549,7 @@ operation QuerySecondaryIndexRange {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/index/{field}/{value}?stream=true", code: 200)
 operation StreamSecondaryIndex {
     input: SecondaryIndexStreamInput
@@ -536,6 +558,7 @@ operation StreamSecondaryIndex {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/index/{field}/{start}/{end}?stream=true", code: 200)
 operation StreamSecondaryIndexRange {
     input: SecondaryIndexRangeStreamInput
@@ -544,6 +567,7 @@ operation StreamSecondaryIndexRange {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/buckets/{bucket}/index/{field}/{value}", code: 200)
 operation QueryDefaultSecondaryIndex {
     input: DefaultSecondaryIndexInput
@@ -552,6 +576,7 @@ operation QueryDefaultSecondaryIndex {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/buckets/{bucket}/index/{field}/{start}/{end}", code: 200)
 operation QueryDefaultSecondaryIndexRange {
     input: DefaultSecondaryIndexRangeInput
@@ -560,6 +585,7 @@ operation QueryDefaultSecondaryIndexRange {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/buckets/{bucket}/index/{field}/{value}?stream=true", code: 200)
 operation StreamDefaultSecondaryIndex {
     input: DefaultSecondaryIndexStreamInput
@@ -568,6 +594,7 @@ operation StreamDefaultSecondaryIndex {
 }
 
 @readonly
+@documentation("Deprecated legacy secondary index API but still served on openriak-3.4. Prefer the Query API.")
 @http(method: "GET", uri: "/buckets/{bucket}/index/{field}/{start}/{end}?stream=true", code: 200)
 operation StreamDefaultSecondaryIndexRange {
     input: DefaultSecondaryIndexRangeStreamInput
@@ -605,6 +632,7 @@ operation GetDefaultBucketQueryResults {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, GoneError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API for data queries.")
 @http(method: "POST", uri: "/mapred", code: 200)
 operation MapReduce {
     input: MapReduceInput
@@ -612,6 +640,7 @@ operation MapReduce {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotAcceptableError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API for data queries.")
 @http(method: "POST", uri: "/mapred?chunked=true", code: 200)
 operation MapReduceChunked {
     input: MapReduceInput
@@ -620,6 +649,7 @@ operation MapReduceChunked {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API for data queries.")
 @http(method: "HEAD", uri: "/mapred", code: 200)
 operation HeadMapReduce {
     output: HeaderOutput
@@ -627,6 +657,7 @@ operation HeadMapReduce {
 }
 
 @readonly
+@documentation("Deprecated in docs but still served on openriak-3.4. Prefer the Query API for data queries.")
 @http(method: "GET", uri: "/mapred", code: 200)
 operation GetMapReduceUsage {
     output: TextOutput
@@ -1677,6 +1708,14 @@ structure DefaultBucketQueryResultsInput with [DefaultBucketIdentity, TimeoutOpt
     maxResults: Integer
 }
 
+structure MapReduceRequest {
+    @required
+    inputs: Document
+
+    @required
+    query: Document
+}
+
 structure MapReduceInput {
     @required
     @httpHeader("Content-Type")
@@ -1687,7 +1726,16 @@ structure MapReduceInput {
 
     @required
     @httpPayload
-    request: JsonDocument
+    request: MapReduceRequest
+}
+
+@documentation("CRDT mutation payload. Wire shape depends on bucket datatype; counters may also accept a bare integer. Sets, maps, and other types use datatype-specific operation fields documented in OtherAPI.")
+structure DatatypeUpdatePayload {
+    increment: Integer
+    decrement: Integer
+    type: String
+    value: Document
+    context: String
 }
 
 @mixin
@@ -1723,7 +1771,7 @@ structure DatatypeUpdateInput with [ObjectIdentity, DatatypeOptions] {
 
     @required
     @httpPayload
-    update: JsonDocument
+    update: DatatypeUpdatePayload
 }
 
 structure DatatypeCreateInput with [BucketIdentity, DatatypeOptions] {
@@ -1733,7 +1781,7 @@ structure DatatypeCreateInput with [BucketIdentity, DatatypeOptions] {
 
     @required
     @httpPayload
-    update: JsonDocument
+    update: DatatypeUpdatePayload
 }
 
 structure DatatypeCreateOutput {
@@ -1911,6 +1959,7 @@ structure BadRequestError {
 structure UnauthorizedError {
     message: String
 
+    @httpHeader("WWW-Authenticate")
     authenticateChallenge: String
 }
 
