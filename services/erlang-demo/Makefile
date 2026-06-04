@@ -31,6 +31,9 @@ build:
 	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
 	rm -f build-errors.log
 
+.PHONY: demo
+demo: build
+
 .PHONY: clean
 clean:
 	#

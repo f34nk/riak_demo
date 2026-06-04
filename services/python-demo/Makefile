@@ -27,6 +27,9 @@ build: install-codegen
 	#
 	smithy build
 
+.PHONY: demo
+demo: build
+
 .PHONY: clean
 clean:
 	#

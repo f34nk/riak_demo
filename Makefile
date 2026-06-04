@@ -117,7 +117,7 @@ _demo:
 	#
 	# Build $(DEMO)
 	#
-	cd $(DEMO) && make clean && time make build
+	cd $(DEMO) && make clean && time make demo
 	
 # Usage: make services
 .PHONY: services
