@@ -23,6 +23,11 @@
         </dependency>
         <dependency>
             <groupId>software.amazon.smithy.java</groupId>
+            <artifactId>client-core</artifactId>
+            <version>${smithy.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.smithy.java</groupId>
             <artifactId>client-http</artifactId>
             <version>${smithy.java.version}</version>
         </dependency>
@@ -30,6 +35,25 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-generated-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>generated/client/java-codegen/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
