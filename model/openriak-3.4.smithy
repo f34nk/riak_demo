@@ -304,10 +304,10 @@ operation HeadObject {
 }
 
 @idempotent
-@http(method: "PUT", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 200)
+@http(method: "PUT", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 204)
 operation PutObject {
     input: PutObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -319,10 +319,10 @@ operation PutObjectReturnBody {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@http(method: "POST", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 200)
+@http(method: "POST", uri: "/types/{bucketType}/buckets/{bucket}/keys/{key}", code: 204)
 operation PostObject {
     input: PutObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -372,10 +372,10 @@ operation HeadDefaultObject {
 }
 
 @idempotent
-@http(method: "PUT", uri: "/buckets/{bucket}/keys/{key}", code: 200)
+@http(method: "PUT", uri: "/buckets/{bucket}/keys/{key}", code: 204)
 operation PutDefaultObject {
     input: PutDefaultObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -387,10 +387,10 @@ operation PutDefaultObjectReturnBody {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@http(method: "POST", uri: "/buckets/{bucket}/keys/{key}", code: 200)
+@http(method: "POST", uri: "/buckets/{bucket}/keys/{key}", code: 204)
 operation PostDefaultObject {
     input: PutDefaultObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -440,10 +440,10 @@ operation HeadLegacyObject {
 }
 
 @idempotent
-@http(method: "PUT", uri: "/riak/{bucket}/{key}", code: 200)
+@http(method: "PUT", uri: "/riak/{bucket}/{key}", code: 204)
 operation PutLegacyObject {
     input: PutDefaultObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -455,10 +455,10 @@ operation PutLegacyObjectReturnBody {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@http(method: "POST", uri: "/riak/{bucket}/{key}", code: 200)
+@http(method: "POST", uri: "/riak/{bucket}/{key}", code: 204)
 operation PostLegacyObject {
     input: PutDefaultObjectInput
-    output: ObjectWriteOutput
+    output: EmptyOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, NotAcceptableError, ConflictError, PreconditionFailedError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
