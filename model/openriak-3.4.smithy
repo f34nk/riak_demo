@@ -97,9 +97,30 @@ service OpenRiak {
         CreateDatatype,
         GetLegacyCounter,
         UpdateLegacyCounter,
-        RunAaeFold,
-        RunAaeFoldRange,
-        RunAaeFoldKeyRange
+        GetMergeRootNval,
+        GetMergeBranchNval,
+        GetFetchClocksNval,
+        GetMergeTreeRange,
+        GetDefaultMergeTreeRange,
+        GetFetchClocksRange,
+        GetDefaultFetchClocksRange,
+        GetReplKeysRange,
+        GetDefaultReplKeysRange,
+        GetRepairKeysRange,
+        GetDefaultRepairKeysRange,
+        GetFindKeysBySiblingCount,
+        GetDefaultFindKeysBySiblingCount,
+        GetFindKeysByObjectSize,
+        GetDefaultFindKeysByObjectSize,
+        GetObjectStats,
+        GetDefaultObjectStats,
+        GetFindTombs,
+        GetDefaultFindTombs,
+        GetEraseKeys,
+        GetDefaultEraseKeys,
+        GetReapTombs,
+        GetDefaultReapTombs,
+        ListAaeBuckets
     ]
 }
 
@@ -636,25 +657,193 @@ operation UpdateLegacyCounter {
 }
 
 @readonly
-@http(method: "GET", uri: "/aaefold/{fold}", code: 200)
-operation RunAaeFold {
-    input: AaeFoldInput
+@http(method: "GET", uri: "/cachedtrees/nvals/{nVal}/root", code: 200)
+operation GetMergeRootNval {
+    input: GetMergeRootNvalInput
     output: StreamOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @readonly
-@http(method: "GET", uri: "/aaefold/{fold}/{bucket}", code: 200)
-operation RunAaeFoldRange {
-    input: AaeFoldBucketInput
+@http(method: "GET", uri: "/cachedtrees/nvals/{nVal}/branch", code: 200)
+operation GetMergeBranchNval {
+    input: GetMergeBranchNvalInput
     output: StreamOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @readonly
-@http(method: "GET", uri: "/aaefold/{fold}/{bucket}/{keyRange}", code: 200)
-operation RunAaeFoldKeyRange {
-    input: AaeFoldKeyRangeInput
+@http(method: "GET", uri: "/cachedtrees/nvals/{nVal}/keysclocks", code: 200)
+operation GetFetchClocksNval {
+    input: GetFetchClocksNvalInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangetrees/types/{bucketType}/buckets/{bucket}/trees/{treeSize}", code: 200)
+operation GetMergeTreeRange {
+    input: GetMergeTreeRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangetrees/buckets/{bucket}/trees/{treeSize}", code: 200)
+operation GetDefaultMergeTreeRange {
+    input: GetDefaultMergeTreeRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangetrees/types/{bucketType}/buckets/{bucket}/keysclocks", code: 200)
+operation GetFetchClocksRange {
+    input: GetFetchClocksRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangetrees/buckets/{bucket}/keysclocks", code: 200)
+operation GetDefaultFetchClocksRange {
+    input: GetDefaultFetchClocksRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangerepl/types/{bucketType}/buckets/{bucket}/queuename/{queueName}", code: 200)
+operation GetReplKeysRange {
+    input: GetReplKeysRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangerepl/buckets/{bucket}/queuename/{queueName}", code: 200)
+operation GetDefaultReplKeysRange {
+    input: GetDefaultReplKeysRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangerepair/types/{bucketType}/buckets/{bucket}", code: 200)
+operation GetRepairKeysRange {
+    input: GetRepairKeysRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/rangerepair/buckets/{bucket}", code: 200)
+operation GetDefaultRepairKeysRange {
+    input: GetDefaultRepairKeysRangeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/siblings/types/{bucketType}/buckets/{bucket}/counts/{count}", code: 200)
+operation GetFindKeysBySiblingCount {
+    input: GetFindKeysBySiblingCountInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/siblings/buckets/{bucket}/counts/{count}", code: 200)
+operation GetDefaultFindKeysBySiblingCount {
+    input: GetDefaultFindKeysBySiblingCountInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/objectsizes/types/{bucketType}/buckets/{bucket}/sizes/{size}", code: 200)
+operation GetFindKeysByObjectSize {
+    input: GetFindKeysByObjectSizeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/objectsizes/buckets/{bucket}/sizes/{size}", code: 200)
+operation GetDefaultFindKeysByObjectSize {
+    input: GetDefaultFindKeysByObjectSizeInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/objectstats/types/{bucketType}/buckets/{bucket}", code: 200)
+operation GetObjectStats {
+    input: GetObjectStatsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/objectstats/buckets/{bucket}", code: 200)
+operation GetDefaultObjectStats {
+    input: GetDefaultObjectStatsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/tombs/types/{bucketType}/buckets/{bucket}", code: 200)
+operation GetFindTombs {
+    input: GetFindTombsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/tombs/buckets/{bucket}", code: 200)
+operation GetDefaultFindTombs {
+    input: GetDefaultFindTombsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/erase/types/{bucketType}/buckets/{bucket}", code: 200)
+operation GetEraseKeys {
+    input: GetEraseKeysInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/erase/buckets/{bucket}", code: 200)
+operation GetDefaultEraseKeys {
+    input: GetDefaultEraseKeysInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/reap/types/{bucketType}/buckets/{bucket}", code: 200)
+operation GetReapTombs {
+    input: GetReapTombsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/reap/buckets/{bucket}", code: 200)
+operation GetDefaultReapTombs {
+    input: GetDefaultReapTombsInput
+    output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/aaebucketlist", code: 200)
+operation ListAaeBuckets {
+    input: ListAaeBucketsInput
     output: StreamOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
@@ -1451,44 +1640,101 @@ structure CounterUpdateInput with [ObjectIdentity, WriteOptions] {
     amount: String
 }
 
-structure AaeFoldInput with [TimeoutOption] {
-    @required
-    @httpLabel
-    fold: NonEmptyString
-
+@mixin
+structure AaeFilterOption {
     @httpQuery("filter")
     filter: String
 }
 
-structure AaeFoldBucketInput with [TimeoutOption] {
-    @required
-    @httpLabel
-    fold: NonEmptyString
-
-    @required
-    @httpLabel
-    bucket: UriSafeIdentifier
-
-    @httpQuery("filter")
-    filter: String
+@mixin
+structure AaeNValOption {
+    @httpQuery("nval")
+    nval: Integer
 }
 
-structure AaeFoldKeyRangeInput with [TimeoutOption] {
+@mixin
+structure NValIdentity {
     @required
     @httpLabel
-    fold: NonEmptyString
-
-    @required
-    @httpLabel
-    bucket: UriSafeIdentifier
-
-    @required
-    @httpLabel
-    keyRange: String
-
-    @httpQuery("filter")
-    filter: String
+    nVal: Integer
 }
+
+@mixin
+structure TreeSizeIdentity {
+    @required
+    @httpLabel
+    treeSize: NonEmptyString
+}
+
+@mixin
+structure SiblingCountIdentity {
+    @required
+    @httpLabel
+    count: Integer
+}
+
+@mixin
+structure ObjectSizeIdentity {
+    @required
+    @httpLabel
+    size: Integer
+}
+
+structure GetMergeRootNvalInput with [NValIdentity, TimeoutOption] {}
+
+structure GetMergeBranchNvalInput with [NValIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetFetchClocksNvalInput with [NValIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetMergeTreeRangeInput with [BucketIdentity, TreeSizeIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultMergeTreeRangeInput with [DefaultBucketIdentity, TreeSizeIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetFetchClocksRangeInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultFetchClocksRangeInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetReplKeysRangeInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {
+    @required
+    @httpLabel
+    queueName: UriSafeIdentifier
+}
+
+structure GetDefaultReplKeysRangeInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {
+    @required
+    @httpLabel
+    queueName: UriSafeIdentifier
+}
+
+structure GetRepairKeysRangeInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultRepairKeysRangeInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetFindKeysBySiblingCountInput with [BucketIdentity, SiblingCountIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultFindKeysBySiblingCountInput with [DefaultBucketIdentity, SiblingCountIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetFindKeysByObjectSizeInput with [BucketIdentity, ObjectSizeIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultFindKeysByObjectSizeInput with [DefaultBucketIdentity, ObjectSizeIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetObjectStatsInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultObjectStatsInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetFindTombsInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultFindTombsInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetEraseKeysInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultEraseKeysInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetReapTombsInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure GetDefaultReapTombsInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
+
+structure ListAaeBucketsInput with [AaeNValOption, TimeoutOption] {}
 
 @error("client")
 @httpError(400)
