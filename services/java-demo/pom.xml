@@ -13,6 +13,8 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <smithy.java.version>1.1.0</smithy.java.version>
+        <smithy.model.version>1.71.0</smithy.model.version>
+        <junit.version>5.11.4</junit.version>
     </properties>
 
     <dependencies>
@@ -30,6 +32,17 @@
             <groupId>software.amazon.smithy.java</groupId>
             <artifactId>client-http</artifactId>
             <version>${smithy.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.smithy</groupId>
+            <artifactId>smithy-model</artifactId>
+            <version>${smithy.model.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -53,6 +66,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
