@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "outputDirectory": "generated",
+  "sources": [
+    "../../model/openriak-3.4.smithy"
+  ],
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy.java:codegen-plugin:1.1.0",
+      "software.amazon.smithy.java:client-core:1.1.0",
+      "software.amazon.smithy.java:client-http:1.1.0"
+    ]
+  },
+  "projections": {
+    "client": {
+      "plugins": {
+        "java-codegen": {
+          "service": "openriak.current.api#OpenRiak",
+          "namespace": "openriak.current.api",
+          "modes": [
+            "client"
+          ],
+          "transport": {
+            "http-java": {}
+          }
+        }
+      }
+    }
+  }
+}
