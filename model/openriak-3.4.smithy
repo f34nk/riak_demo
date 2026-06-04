@@ -120,7 +120,10 @@ service OpenRiak {
         GetDefaultEraseKeys,
         GetReapTombs,
         GetDefaultReapTombs,
-        ListAaeBuckets
+        ListAaeBuckets,
+        GetMembership,
+        GetQueueItem,
+        PushQueueItems
     ]
 }
 
@@ -845,6 +848,29 @@ operation GetDefaultReapTombs {
 operation ListAaeBuckets {
     input: ListAaeBucketsInput
     output: StreamOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/membership_request", code: 200)
+operation GetMembership {
+    input: TimeoutInput
+    output: JsonOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@readonly
+@http(method: "GET", uri: "/queuename/{queueName}", code: 200)
+operation GetQueueItem {
+    input: GetQueueItemInput
+    output: NegotiatedBodyOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, TimeoutError, UpgradeRequiredError, InternalServerError]
+}
+
+@http(method: "POST", uri: "/queuename/{queueName}", code: 200)
+operation PushQueueItems {
+    input: PushQueueItemsInput
+    output: TextOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -1694,17 +1720,9 @@ structure GetFetchClocksRangeInput with [BucketIdentity, AaeFilterOption, Timeou
 
 structure GetDefaultFetchClocksRangeInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
 
-structure GetReplKeysRangeInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {
-    @required
-    @httpLabel
-    queueName: UriSafeIdentifier
-}
+structure GetReplKeysRangeInput with [BucketIdentity, QueueNameIdentity, AaeFilterOption, TimeoutOption] {}
 
-structure GetDefaultReplKeysRangeInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {
-    @required
-    @httpLabel
-    queueName: UriSafeIdentifier
-}
+structure GetDefaultReplKeysRangeInput with [DefaultBucketIdentity, QueueNameIdentity, AaeFilterOption, TimeoutOption] {}
 
 structure GetRepairKeysRangeInput with [BucketIdentity, AaeFilterOption, TimeoutOption] {}
 
@@ -1735,6 +1753,36 @@ structure GetReapTombsInput with [BucketIdentity, AaeFilterOption, TimeoutOption
 structure GetDefaultReapTombsInput with [DefaultBucketIdentity, AaeFilterOption, TimeoutOption] {}
 
 structure ListAaeBucketsInput with [AaeNValOption, TimeoutOption] {}
+
+@mixin
+structure QueueNameIdentity {
+    @required
+    @httpLabel
+    queueName: UriSafeIdentifier
+}
+
+@mixin
+structure QueueObjectFormatOption {
+    @httpQuery("object_format")
+    objectFormat: QueueObjectFormat
+}
+
+enum QueueObjectFormat {
+    INTERNAL = "internal"
+    INTERNAL_AAEHASH = "internal_aaehash"
+}
+
+structure GetQueueItemInput with [QueueNameIdentity, QueueObjectFormatOption] {}
+
+structure PushQueueItemsInput with [QueueNameIdentity] {
+    @required
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
+    @required
+    @httpPayload
+    keysClocks: JsonDocument
+}
 
 @error("client")
 @httpError(400)
