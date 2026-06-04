@@ -20,7 +20,6 @@ final class OpenRiakModel {
             }
             Node node = Node.parse(in);
             this.model = Model.assembler()
-                    .disablePrelude()
                     .addDocumentNode(node)
                     .assemble()
                     .unwrap();
