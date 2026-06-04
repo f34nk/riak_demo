@@ -24,4 +24,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf build generated build-errors.log src/main/resources/openriak/*.json
+	rm -rf build generated build-errors.log src/main/resources/openriak/*.json .deps
