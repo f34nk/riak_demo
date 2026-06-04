@@ -3,6 +3,10 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
+## 2026-06-04
+### Changed
+- OpenRiak Docker image builds the openriak-3.4 branch with Erlang 26 on Debian bookworm.
+
 ## 2026-05-24
 ### Added
 - Gleam, Erlang client demos.
@@ -10,6 +14,9 @@ All notable changes to this project will be documented here.
 ### Fixed
 - Demo build waits for completion by polling demo-done instead of compose wait, which failed after one-shot containers exited.
 - Build output is captured to build.log, resources are cleaned on teardown, and the build fails when demos do not finish successfully.
+
+### Changed
+- README links to OpenRiak and clarifies that only the HTTP API is tested.
 
 ## 2026-05-23
 ### Added
