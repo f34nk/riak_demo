@@ -4,8 +4,17 @@ All notable changes to this project will be documented here.
 ## [Unreleased]
 
 ## 2026-06-04
+### Added
+- Smithy model for the OpenRiak 3.4 HTTP API, including KV, query, map reduce, datatypes, admin, and queue operations.
+- Makefile validate target to check the Smithy model.
+
+### Fixed
+- Smithy validation issues by routing conflicting Riak headers through prefix headers, removing an unsupported auth header binding, and suppressing non-4xx error semantics where the server uses redirect and multiple-choice responses.
+- Legacy counter routes, empty-body PUT and POST status codes, and bucket properties payload naming in the Smithy model.
+
 ### Changed
 - OpenRiak Docker image builds the openriak-3.4 branch with Erlang 26 on Debian bookworm.
+- Smithy model expanded with typed query payloads, conditional write headers, sibling read handling, CRDT response headers, AAE fold routes, fetch and replication queues, and client generation traits.
 
 ## 2026-05-24
 ### Added
