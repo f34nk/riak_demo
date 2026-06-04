@@ -54,3 +54,8 @@ clean:
 	#
 	rm -f *.log
 	docker compose down -v --rmi local
+
+.PHONY: validate
+validate:
+	smithy validate model/*.smithy | tee validate.log
+	[ -s validate.log ] || rm -rf validate.log
