@@ -18,6 +18,7 @@ use smithy.api#protocolDefinition
 use smithy.api#readonly
 use smithy.api#required
 use smithy.api#streaming
+use smithy.api#documentation
 use smithy.api#trait
 
 @trait(selector: "service")
@@ -644,15 +645,17 @@ operation CreateDatatype {
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
+@documentation("Legacy counter API on default-bucket paths. Deprecated in docs but still served on openriak-3.4.")
 @readonly
-@http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/counters/{key}", code: 200)
+@http(method: "GET", uri: "/buckets/{bucket}/counters/{key}", code: 200)
 operation GetLegacyCounter {
     input: CounterReadInput
     output: TextOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
-@http(method: "POST", uri: "/types/{bucketType}/buckets/{bucket}/counters/{key}", code: 200)
+@documentation("Legacy counter API on default-bucket paths. Deprecated in docs but still served on openriak-3.4.")
+@http(method: "POST", uri: "/buckets/{bucket}/counters/{key}", code: 200)
 operation UpdateLegacyCounter {
     input: CounterUpdateInput
     output: TextOutput
@@ -1658,9 +1661,24 @@ structure DatatypeCreateOutput {
     body: JsonDocument
 }
 
-structure CounterReadInput with [ObjectIdentity, ReadOptions] {}
+structure CounterReadInput with [DefaultObjectIdentity, ReadOptions] {}
 
-structure CounterUpdateInput with [ObjectIdentity, WriteOptions] {
+@mixin
+structure CounterWriteOptions with [TimeoutOption] {
+    @httpQuery("w")
+    w: Quorum
+
+    @httpQuery("pw")
+    pw: Quorum
+
+    @httpQuery("dw")
+    dw: Quorum
+}
+
+structure CounterUpdateInput with [DefaultObjectIdentity, CounterWriteOptions] {
+    @httpQuery("returnvalue")
+    returnValue: Boolean
+
     @required
     @httpPayload
     amount: String
