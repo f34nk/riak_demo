@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "outputDirectory": "generated",
+  "sources": [
+    "../../model/openriak-3.4.smithy"
+  ],
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy:smithy-model:1.70.0",
+      "software.amazon.smithy:smithy-aws-traits:1.70.0",
+      "software.amazon.smithy.python.codegen:core:0.3.0"
+    ]
+  },
+  "projections": {
+    "client": {
+      "plugins": {
+        "python-client-codegen": {
+          "service": "openriak.current.api#OpenRiak",
+          "module": "openriak",
+          "moduleVersion": "0.1.0"
+        }
+      }
+    }
+  }
+}
