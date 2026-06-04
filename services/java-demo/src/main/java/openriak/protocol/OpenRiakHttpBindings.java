@@ -16,8 +16,10 @@ import software.amazon.smithy.java.io.datastream.DataStream;
 import software.amazon.smithy.java.io.uri.SmithyUri;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.HttpTrait;
 
 final class OpenRiakHttpBindings {
@@ -42,7 +44,13 @@ final class OpenRiakHttpBindings {
         StringBuilder query = new StringBuilder();
         DataStream body = null;
 
-        for (HttpBinding binding : index.getRequestBindings(opId).values()) {
+        StructureShape inputShape = OpenRiakModel.model().expectShape(input.schema().id(), StructureShape.class);
+        Map<String, HttpBinding> requestBindings = index.getRequestBindings(opId);
+        for (MemberShape memberShape : inputShape.members()) {
+            HttpBinding binding = requestBindings.get(memberShape.getMemberName());
+            if (binding == null) {
+                continue;
+            }
             Schema member = input.schema().member(binding.getMemberName());
             Object value = input.getMemberValue(member);
             if (value == null) {
