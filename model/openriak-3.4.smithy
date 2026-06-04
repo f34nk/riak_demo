@@ -637,22 +637,22 @@ operation GetMapReduceUsage {
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/datatypes/{key}", code: 200)
 operation GetDatatype {
     input: DatatypeReadInput
-    output: JsonOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    output: DatatypeOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, MovedPermanentlyError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @http(method: "POST", uri: "/types/{bucketType}/buckets/{bucket}/datatypes/{key}", code: 200)
 operation UpdateDatatype {
     input: DatatypeUpdateInput
-    output: JsonOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    output: DatatypeOutput
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, MovedPermanentlyError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @http(method: "POST", uri: "/types/{bucketType}/buckets/{bucket}/datatypes", code: 201)
 operation CreateDatatype {
     input: DatatypeCreateInput
     output: DatatypeCreateOutput
-    errors: [BadRequestError, UnauthorizedError, ForbiddenError, ConflictError, TimeoutError, UpgradeRequiredError, InternalServerError]
+    errors: [BadRequestError, UnauthorizedError, ForbiddenError, ConflictError, MovedPermanentlyError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
 @documentation("Legacy counter API on default-bucket paths. Deprecated in docs but still served on openriak-3.4.")
@@ -1121,6 +1121,21 @@ structure JsonOutput {
     body: JsonDocument
 }
 
+@documentation("CRDT fetch or update response. When include_context is true, the opaque context may appear in the JSON body and in X-Riak-CRDT-Ctx.")
+structure DatatypeOutput {
+    @httpResponseCode
+    statusCode: Integer
+
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
+    @httpHeader("X-Riak-CRDT-Ctx")
+    crdtContext: String
+
+    @httpPayload
+    body: JsonDocument
+}
+
 @documentation("Paginated query results. Fetch responses may include returned_count, queued_count, and query_complete keys. queue_raw_keys and queue_raw_terms accumulation options return a result_queue reference for subsequent GET fetches.")
 structure QueryOutput {
     @httpResponseCode
@@ -1348,6 +1363,9 @@ structure ObjectOutput {
     @httpHeader("Link")
     link: String
 
+    @httpHeader("X-Riak-Deleted")
+    deleted: String
+
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
 
@@ -1374,6 +1392,9 @@ structure HeadObjectOutput {
 
     @httpHeader("Link")
     link: String
+
+    @httpHeader("X-Riak-Deleted")
+    deleted: String
 
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
@@ -1722,6 +1743,9 @@ structure DatatypeCreateOutput {
     @httpHeader("Content-Type")
     contentType: MediaType
 
+    @httpHeader("X-Riak-CRDT-Ctx")
+    crdtContext: String
+
     @httpPayload
     body: JsonDocument
 }
@@ -1921,6 +1945,16 @@ structure ConflictError {
 @httpError(410)
 structure GoneError {
     message: String
+}
+
+@documentation("Default-bucket CRDT counter requests redirect to the legacy counter route at /buckets/{bucket}/counters/{key}.")
+@error("client")
+@httpError(301)
+structure MovedPermanentlyError {
+    message: String
+
+    @httpHeader("Location")
+    location: String
 }
 
 @error("client")
