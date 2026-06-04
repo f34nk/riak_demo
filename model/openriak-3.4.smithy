@@ -18,6 +18,7 @@ use smithy.api#protocolDefinition
 use smithy.api#readonly
 use smithy.api#required
 use smithy.api#streaming
+use smithy.api#Document
 use smithy.api#documentation
 use smithy.api#trait
 
@@ -582,7 +583,7 @@ operation RunBucketQuery {
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/query", code: 200)
 operation GetBucketQueryResults {
     input: BucketQueryResultsInput
-    output: JsonOutput
+    output: QueryOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, GoneError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -597,7 +598,7 @@ operation RunDefaultBucketQuery {
 @http(method: "GET", uri: "/buckets/{bucket}/query", code: 200)
 operation GetDefaultBucketQueryResults {
     input: DefaultBucketQueryResultsInput
-    output: JsonOutput
+    output: QueryOutput
     errors: [BadRequestError, UnauthorizedError, ForbiddenError, GoneError, TimeoutError, UpgradeRequiredError, InternalServerError]
 }
 
@@ -1117,6 +1118,21 @@ structure JsonOutput {
     body: JsonDocument
 }
 
+@documentation("Paginated query results. Fetch responses may include returned_count, queued_count, and query_complete keys. queue_raw_keys and queue_raw_terms accumulation options return a result_queue reference for subsequent GET fetches.")
+structure QueryOutput {
+    @httpResponseCode
+    statusCode: Integer
+
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
+    @httpHeader("X-Riak-Continuation")
+    continuation: String
+
+    @httpPayload
+    body: JsonDocument
+}
+
 structure NegotiatedBodyOutput {
     @httpResponseCode
     statusCode: Integer
@@ -1565,6 +1581,37 @@ structure DefaultSecondaryIndexRangeStreamInput with [DefaultBucketIdentity, Sec
     end: String
 }
 
+structure QuerySpec {
+    @required
+    indexName: String
+
+    startTerm: String
+    endTerm: String
+    aggregationTag: String
+    regularExpression: String
+    evaluationExpression: String
+    filterExpression: String
+}
+
+list QueryList {
+    member: QuerySpec
+}
+
+@documentation("Query request body. Wire JSON uses snake_case keys: query_list, aggregation_expression, accumulation_option, accumulation_term, inactivity_timeout, max_results.")
+structure BucketQueryRequest {
+    @required
+    queryList: QueryList
+
+    aggregationExpression: String
+    accumulationOption: String
+    accumulationTerm: String
+    substitutions: Document
+    timeout: Integer
+    inactivityTimeout: Integer
+    maxResults: Integer
+    continuation: String
+}
+
 structure BucketQueryInput with [BucketIdentity] {
     @required
     @httpHeader("Content-Type")
@@ -1572,7 +1619,7 @@ structure BucketQueryInput with [BucketIdentity] {
 
     @required
     @httpPayload
-    query: JsonDocument
+    query: BucketQueryRequest
 }
 
 structure BucketQueryResultsInput with [BucketIdentity, TimeoutOption] {
@@ -1591,7 +1638,7 @@ structure DefaultBucketQueryInput with [DefaultBucketIdentity] {
 
     @required
     @httpPayload
-    query: JsonDocument
+    query: BucketQueryRequest
 }
 
 structure DefaultBucketQueryResultsInput with [DefaultBucketIdentity, TimeoutOption] {
