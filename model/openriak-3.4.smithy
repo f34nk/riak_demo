@@ -1038,6 +1038,7 @@ structure ConditionalReadHeaders {
     ifModifiedSince: HttpDate
 }
 
+@documentation("Riak-native conditional writes use x-riak-if-not-modified with an encoded vclock from a prior read, alongside standard If-Match and If-Unmodified-Since headers.")
 @mixin
 structure ConditionalWriteHeaders {
     @httpHeader("If-None-Match")
@@ -1048,6 +1049,9 @@ structure ConditionalWriteHeaders {
 
     @httpHeader("If-Unmodified-Since")
     ifUnmodifiedSince: HttpDate
+
+    @httpHeader("x-riak-if-not-modified")
+    ifNotModified: VClock
 }
 
 structure AcceptInput {
@@ -1206,6 +1210,7 @@ structure HeadObjectInput with [ObjectIdentity, ReadOptions, ConditionalReadHead
     vtag: VTag
 }
 
+@documentation("Supports x-riak-if-not-modified and standard conditional headers for Riak-native conditional updates.")
 structure PutObjectInput with [ObjectIdentity, ObjectWriteOptions, ConditionalWriteHeaders] {
     @required
     @httpHeader("Content-Type")
@@ -1225,6 +1230,7 @@ structure PutObjectInput with [ObjectIdentity, ObjectWriteOptions, ConditionalWr
     body: ByteStream
 }
 
+@documentation("Supports x-riak-if-not-modified and standard conditional headers for Riak-native conditional updates.")
 structure CreateObjectInput with [BucketIdentity, ObjectWriteOptions, ConditionalWriteHeaders] {
     @required
     @httpHeader("Content-Type")
@@ -1244,7 +1250,7 @@ structure CreateObjectInput with [BucketIdentity, ObjectWriteOptions, Conditiona
     body: ByteStream
 }
 
-structure DeleteObjectInput with [ObjectIdentity, DeleteOptions] {
+structure DeleteObjectInput with [ObjectIdentity, DeleteOptions, ConditionalWriteHeaders] {
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
 }
@@ -1259,6 +1265,7 @@ structure HeadDefaultObjectInput with [DefaultObjectIdentity, ReadOptions, Condi
     vtag: VTag
 }
 
+@documentation("Supports x-riak-if-not-modified and standard conditional headers for Riak-native conditional updates.")
 structure PutDefaultObjectInput with [DefaultObjectIdentity, ObjectWriteOptions, ConditionalWriteHeaders] {
     @required
     @httpHeader("Content-Type")
@@ -1278,6 +1285,7 @@ structure PutDefaultObjectInput with [DefaultObjectIdentity, ObjectWriteOptions,
     body: ByteStream
 }
 
+@documentation("Supports x-riak-if-not-modified and standard conditional headers for Riak-native conditional updates.")
 structure CreateDefaultObjectInput with [DefaultBucketIdentity, ObjectWriteOptions, ConditionalWriteHeaders] {
     @required
     @httpHeader("Content-Type")
@@ -1297,7 +1305,7 @@ structure CreateDefaultObjectInput with [DefaultBucketIdentity, ObjectWriteOptio
     body: ByteStream
 }
 
-structure DeleteDefaultObjectInput with [DefaultObjectIdentity, DeleteOptions] {
+structure DeleteDefaultObjectInput with [DefaultObjectIdentity, DeleteOptions, ConditionalWriteHeaders] {
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
 }
