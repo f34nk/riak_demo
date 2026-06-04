@@ -163,7 +163,7 @@ operation HeadStats {
 
 @readonly
 @http(method: "GET", uri: "/types/{bucketType}/props", code: 200)
-@documentation("Response body uses a props envelope: {\"props\": {...}}.")
+@documentation("Response body uses a props envelope: {'props': {...}}.")
 operation GetBucketTypeProperties {
     input: BucketTypeInput
     output: JsonOutput
@@ -216,7 +216,7 @@ operation StreamDefaultBuckets {
 
 @readonly
 @http(method: "GET", uri: "/types/{bucketType}/buckets/{bucket}/props", code: 200)
-@documentation("Response body uses a props envelope: {\"props\": {...}}.")
+@documentation("Response body uses a props envelope: {'props': {...}}.")
 operation GetBucketProperties {
     input: BucketInput
     output: JsonOutput
@@ -241,7 +241,7 @@ operation ResetBucketProperties {
 
 @readonly
 @http(method: "GET", uri: "/buckets/{bucket}/props", code: 200)
-@documentation("Response body uses a props envelope: {\"props\": {...}}.")
+@documentation("Response body uses a props envelope: {'props': {...}}.")
 operation GetDefaultBucketProperties {
     input: DefaultBucketInput
     output: JsonOutput
