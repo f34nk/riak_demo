@@ -14,7 +14,6 @@ use smithy.api#httpResponseCode
 use smithy.api#idempotent
 use smithy.api#length
 use smithy.api#pattern
-use smithy.api#protocolDefinition
 use smithy.api#readonly
 use smithy.api#required
 use smithy.api#streaming
@@ -22,15 +21,9 @@ use smithy.api#Document
 use smithy.api#documentation
 use smithy.api#httpBasicAuth
 use smithy.api#suppress
-use smithy.api#trait
-
-@trait(selector: "service")
-@protocolDefinition
-structure openRiakHttp {}
 
 @documentation("OpenRiak uses HTTP Basic authentication. A 401 response includes a WWW-Authenticate challenge when credentials are missing or invalid. Sending credentials over plain HTTP may yield 426 Upgrade Required.")
 @httpBasicAuth
-@openRiakHttp
 service OpenRiak {
     version: "2026-05-06"
     operations: [
