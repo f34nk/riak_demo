@@ -21,6 +21,7 @@ use smithy.api#streaming
 use smithy.api#Document
 use smithy.api#documentation
 use smithy.api#httpBasicAuth
+use smithy.api#suppress
 use smithy.api#trait
 
 @trait(selector: "service")
@@ -1076,7 +1077,7 @@ structure ConditionalReadHeaders {
     ifModifiedSince: HttpDate
 }
 
-@documentation("Riak-native conditional writes use x-riak-if-not-modified with an encoded vclock from a prior read, alongside standard If-Match and If-Unmodified-Since headers.")
+@documentation("Riak-native conditional writes use x-riak-if-not-modified with an encoded vclock from a prior read, alongside standard If-Match and If-Unmodified-Since headers. Set riakHeaders key if-not-modified to the encoded vclock.")
 @mixin
 structure ConditionalWriteHeaders {
     @httpHeader("If-None-Match")
@@ -1087,9 +1088,6 @@ structure ConditionalWriteHeaders {
 
     @httpHeader("If-Unmodified-Since")
     ifUnmodifiedSince: HttpDate
-
-    @httpHeader("x-riak-if-not-modified")
-    ifNotModified: VClock
 }
 
 structure AcceptInput {
@@ -1378,6 +1376,7 @@ structure DeleteDefaultObjectInput with [DefaultObjectIdentity, DeleteOptions, C
     riakHeaders: RiakHeaders
 }
 
+@documentation("Tombstone reads expose X-Riak-Deleted via riakHeaders key deleted.")
 structure ObjectOutput {
     @httpResponseCode
     statusCode: Integer
@@ -1397,9 +1396,6 @@ structure ObjectOutput {
     @httpHeader("Link")
     link: String
 
-    @httpHeader("X-Riak-Deleted")
-    deleted: String
-
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
 
@@ -1408,6 +1404,7 @@ structure ObjectOutput {
     body: ByteStream
 }
 
+@documentation("Tombstone reads expose X-Riak-Deleted via riakHeaders key deleted.")
 structure HeadObjectOutput {
     @httpResponseCode
     statusCode: Integer
@@ -1426,9 +1423,6 @@ structure HeadObjectOutput {
 
     @httpHeader("Link")
     link: String
-
-    @httpHeader("X-Riak-Deleted")
-    deleted: String
 
     @httpPrefixHeaders("x-riak-")
     riakHeaders: RiakHeaders
@@ -1708,7 +1702,7 @@ structure DefaultBucketQueryResultsInput with [DefaultBucketIdentity, TimeoutOpt
     maxResults: Integer
 }
 
-structure MapReduceRequest {
+structure MapReduceJob {
     @required
     inputs: Document
 
@@ -1726,7 +1720,7 @@ structure MapReduceInput {
 
     @required
     @httpPayload
-    request: MapReduceRequest
+    request: MapReduceJob
 }
 
 @documentation("CRDT mutation payload. Wire shape depends on bucket datatype; counters may also accept a bare integer. Sets, maps, and other types use datatype-specific operation fields documented in OtherAPI.")
@@ -1958,9 +1952,6 @@ structure BadRequestError {
 @httpError(401)
 structure UnauthorizedError {
     message: String
-
-    @httpHeader("WWW-Authenticate")
-    authenticateChallenge: String
 }
 
 @error("client")
@@ -2000,6 +1991,7 @@ structure GoneError {
 }
 
 @documentation("Default-bucket CRDT counter requests redirect to the legacy counter route at /buckets/{bucket}/counters/{key}.")
+@suppress(["HttpResponseCodeSemantics"])
 @error("client")
 @httpError(301)
 structure MovedPermanentlyError {
@@ -2009,11 +2001,10 @@ structure MovedPermanentlyError {
     location: String
 }
 
+@suppress(["HttpResponseCodeSemantics"])
 @error("client")
 @httpError(300)
 structure MultipleChoicesError {
-    message: String
-
     @httpHeader("Content-Type")
     contentType: MediaType
 
