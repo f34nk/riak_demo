@@ -22,7 +22,11 @@ use smithy.api#documentation
 use smithy.api#httpBasicAuth
 use smithy.api#suppress
 
-@documentation("OpenRiak uses HTTP Basic authentication. A 401 response includes a WWW-Authenticate challenge when credentials are missing or invalid. Sending credentials over plain HTTP may yield 426 Upgrade Required.")
+@documentation("""
+OpenRiak HTTP API for openriak-3.4. Routes and payloads are modeled with standard Smithy HTTP binding traits only (@http, @httpLabel, @httpQuery, @httpHeader, @httpPrefixHeaders, @httpPayload, @httpResponseCode, @httpError). There is no custom protocol trait and no stock restJson1-style envelope; clients must implement Riak wire details (x-riak- prefix headers, opaque object bodies, multipart siblings, quorum query strings) in application or custom runtime code.
+
+When Riak security is enabled, call the API over HTTPS with HTTP Basic credentials (@httpBasicAuth). Missing or invalid credentials yield 401 with a WWW-Authenticate challenge (Basic realm=\"Riak\"). Credentials sent over plain HTTP may yield 426 Upgrade Required.
+""")
 @httpBasicAuth
 service OpenRiak {
     version: "2026-05-06"
@@ -1941,9 +1945,13 @@ structure BadRequestError {
     riakHeaders: RiakHeaders
 }
 
+@documentation("Returned when Riak security is enabled and credentials are missing or invalid. The response includes a WWW-Authenticate challenge (Basic realm=\"Riak\"); Smithy cannot bind that header on error shapes.")
 @error("client")
 @httpError(401)
 structure UnauthorizedError {
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
     message: String
 }
 
@@ -2017,9 +2025,13 @@ structure PreconditionFailedError {
     vclock: VClock
 }
 
+@documentation("Returned when Riak security is enabled and a request includes credentials over plain HTTP instead of HTTPS.")
 @error("client")
 @httpError(426)
 structure UpgradeRequiredError {
+    @httpHeader("Content-Type")
+    contentType: MediaType
+
     message: String
 }
 
