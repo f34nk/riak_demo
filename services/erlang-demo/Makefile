@@ -39,7 +39,6 @@ build/rebar: build
 
 .PHONY: demo
 demo: build/rebar
-	rebar3 shell --eval 'riak_erlang_demo:run().' --noshell --quiet
 
 .PHONY: clean
 clean:
