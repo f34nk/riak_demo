@@ -1,3 +1,4 @@
 *.class
 target/
 .deps/
+src/main/resources/openriak/*.json
