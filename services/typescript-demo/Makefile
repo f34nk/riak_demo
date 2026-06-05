@@ -1,12 +1,19 @@
 JDK21 := $(shell asdf where java openjdk-21)
 SMITHY_HOME := $(shell brew --prefix smithy-cli)/libexec
 CLIENT_DIR := generated/client/typescript-client-codegen
+CODEGEN_JAR := $(HOME)/.m2/repository/openriak/openriak-typescript-codegen/0.1.0/openriak-typescript-codegen-0.1.0.jar
+
+.PHONY: install-codegen
+install-codegen: $(CODEGEN_JAR)
+
+$(CODEGEN_JAR):
+	cd codegen && mvn -q install
 
 .PHONY: build
 build: build/smithy build/client
 
 .PHONY: build/smithy
-build/smithy:
+build/smithy: install-codegen
 	#
 	# Smithy codegen
 	#
