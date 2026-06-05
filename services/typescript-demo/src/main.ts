@@ -35,6 +35,10 @@ const TEST_OBJECT = {
   message: "Hello from OpenRiak",
 };
 
+const TEST_RIAK_HEADERS = {
+  "meta-owner": "typescript",
+};
+
 async function main(): Promise<void> {
   console.log("=== OpenRiak TypeScript Demo ===");
   console.log(`Using OpenRiak at ${endpoint}`);
@@ -48,6 +52,7 @@ async function main(): Promise<void> {
       contentType: "application/json",
       w: "1",
       dw: "1",
+      riakHeaders: TEST_RIAK_HEADERS,
       body: jsonBytes,
     }),
   );
@@ -66,6 +71,12 @@ async function main(): Promise<void> {
   console.log(
     `Read object  <- bucket='${BUCKET}' key='${KEY}' status=${getOutput.statusCode}`,
   );
+
+  const metaOwner = getOutput.riakHeaders?.["meta-owner"];
+  console.log(`Riak header meta-owner='${metaOwner ?? ""}'`);
+  if (metaOwner !== TEST_RIAK_HEADERS["meta-owner"]) {
+    throw new Error("Riak header meta-owner mismatch after read!");
+  }
 
   const bodyBytes = await getOutput.body!.transformToByteArray();
   const result = JSON.parse(new TextDecoder().decode(bodyBytes)) as Record<

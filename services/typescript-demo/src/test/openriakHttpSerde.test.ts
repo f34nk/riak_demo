@@ -77,6 +77,9 @@ describe("OpenRiak HTTP serde", () => {
       contentType: "application/json",
       w: "1",
       dw: "1",
+      riakHeaders: {
+        "meta-owner": "typescript",
+      },
       body: json,
     };
 
@@ -86,6 +89,7 @@ describe("OpenRiak HTTP serde", () => {
     assert.equal(request.path, "/buckets/demo/keys/hello-typescript");
     assert.deepEqual(request.query, { w: "1", dw: "1" });
     assert.equal(request.headers["content-type"], "application/json");
+    assert.equal(request.headers["x-riak-meta-owner"], "typescript");
     assert.notEqual(request.body, undefined);
   });
 

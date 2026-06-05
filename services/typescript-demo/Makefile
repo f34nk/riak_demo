@@ -27,6 +27,7 @@ build/client:
 
 .PHONY: test
 test:
+	npm install && npm test
 
 .PHONY: demo
 demo: build test
