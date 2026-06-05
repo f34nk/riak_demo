@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.nio.charset.StandardCharsets;
-import openriak.current.api.model.GetDefaultObject;
-import openriak.current.api.model.GetDefaultObjectOperationInput;
-import openriak.current.api.model.GetDefaultObjectOutput;
-import openriak.current.api.model.PutDefaultObject;
-import openriak.current.api.model.PutDefaultObjectOperationInput;
+import openriak.v3_4.api.model.GetDefaultObject;
+import openriak.v3_4.api.model.GetDefaultObjectOperationInput;
+import openriak.v3_4.api.model.GetDefaultObjectOutput;
+import openriak.v3_4.api.model.PutDefaultObject;
+import openriak.v3_4.api.model.PutDefaultObjectOperationInput;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.java.context.Context;
 import software.amazon.smithy.java.core.serde.TypeRegistry;

@@ -30,7 +30,7 @@ public final class OpenRiakHttpProtocolGenerator extends HttpBindingProtocolGene
 
     @Override
     public ShapeId getProtocol() {
-        return ShapeId.from("openriak.current.api#openRiakHttp");
+        return ShapeId.from("openriak.v3_4.api#openRiakHttp");
     }
 
     @Override

@@ -14,10 +14,10 @@
     "client": {
       "plugins": {
         "typescript-client-codegen": {
-          "service": "openriak.current.api#OpenRiak",
+          "service": "openriak.v3_4.api#OpenRiak",
           "package": "@openriak/client",
           "packageVersion": "0.1.0",
-          "protocol": "openriak.current.api#openRiakHttp"
+          "protocol": "openriak.v3_4.api#openRiakHttp"
         }
       }
     }

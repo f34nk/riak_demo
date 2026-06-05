@@ -15,7 +15,7 @@
     "client": {
       "plugins": {
         "python-client-codegen": {
-          "service": "openriak.current.api#OpenRiak",
+          "service": "openriak.v3_4.api#OpenRiak",
           "module": "openriak",
           "moduleVersion": "0.1.0"
         }

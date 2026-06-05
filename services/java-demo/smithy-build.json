@@ -15,8 +15,8 @@
     "client": {
       "plugins": {
         "java-codegen": {
-          "service": "openriak.current.api#OpenRiak",
-          "namespace": "openriak.current.api",
+          "service": "openriak.v3_4.api#OpenRiak",
+          "namespace": "openriak.v3_4.api",
           "modes": [
             "client"
           ],

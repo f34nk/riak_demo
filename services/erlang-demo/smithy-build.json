@@ -19,7 +19,7 @@
   },
   "plugins": {
     "erlang-client-codegen": {
-      "service": "openriak.current.api#OpenRiak",
+      "service": "openriak.v3_4.api#OpenRiak",
       "edition": "2026"
     }
   }

@@ -13,7 +13,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 
 public final class OpenRiakHttpProtocol extends HttpClientProtocol {
 
-    public static final ShapeId ID = ShapeId.from("openriak.current.api#openRiakHttp");
+    public static final ShapeId ID = ShapeId.from("openriak.v3_4.api#openRiakHttp");
 
     private final OpenRiakHttpBindings bindings = new OpenRiakHttpBindings();
     private final OpenRiakHttpErrors errors = new OpenRiakHttpErrors();

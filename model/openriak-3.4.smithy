@@ -1,6 +1,6 @@
 $version: "2"
 
-namespace openriak.current.api
+namespace openriak.v3_4.api
 
 use smithy.api#error
 use smithy.api#http
