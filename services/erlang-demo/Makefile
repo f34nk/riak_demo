@@ -4,7 +4,7 @@ export SMITHY_MAVEN_REPOS := $(M2_LOCAL)|$(MAVEN_CENTRAL)
 
 SMITHY_BEAM_SRC ?= $(CURDIR)/.smithy-beam
 SMITHY_BEAM_REPO ?= https://github.com/f34nk/smithy-beam.git
-SMITHY_BEAM_REF ?= develop
+SMITHY_BEAM_REF ?= v3
 CODEGEN_JAR := $(HOME)/.m2/repository/io/smithy/beam/codegen-erlang/0.1.0-SNAPSHOT/codegen-erlang-0.1.0-SNAPSHOT.jar
 
 JDK21 := $(shell asdf where java openjdk-21)
@@ -17,14 +17,14 @@ all: build
 install-codegen: $(CODEGEN_JAR)
 
 $(CODEGEN_JAR):
-	@test -d "$(SMITHY_BEAM_SRC)/codegen" || { \
+	@test -d "$(SMITHY_BEAM_SRC)" || { \
 		echo "Cloning smithy-beam ($(SMITHY_BEAM_REF))..."; \
 		git clone --depth 1 --branch "$(SMITHY_BEAM_REF)" "$(SMITHY_BEAM_REPO)" "$(SMITHY_BEAM_SRC)"; \
 	}
-	cd "$(SMITHY_BEAM_SRC)/codegen" && ./gradlew publishToMavenLocal
+	cd "$(SMITHY_BEAM_SRC)" && make build
 
 .PHONY: build
-build:
+build: install-codegen
 	#
 	# Build
 	#
@@ -39,4 +39,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf build generated
+	rm -rf _build build generated .smithy-beam
