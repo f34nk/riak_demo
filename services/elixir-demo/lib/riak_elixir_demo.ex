@@ -10,7 +10,7 @@ defmodule RiakElixirDemo do
   }
 
   def run do
-    riak_host = System.get_env("RIAK_HOST", "riak")
+    riak_host = System.get_env("RIAK_HOST", "openriak")
     riak_port = System.get_env("RIAK_PORT", "8098")
     base_url = "http://#{riak_host}:#{riak_port}"
 

@@ -9,7 +9,7 @@
 }).
 
 run() ->
-    RiakHost = getenv("RIAK_HOST", "riak"),
+    RiakHost = getenv("RIAK_HOST", "openriak"),
     RiakPort = getenv("RIAK_PORT", "8098"),
     BaseUrl = "http://" ++ RiakHost ++ ":" ++ RiakPort,
 

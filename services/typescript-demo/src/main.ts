@@ -1,4 +1,4 @@
-const RIAK_HOST = process.env.RIAK_HOST ?? "riak";
+const RIAK_HOST = process.env.RIAK_HOST ?? "openriak";
 const RIAK_PORT = process.env.RIAK_PORT ?? "8098";
 const BASE_URL = `http://${RIAK_HOST}:${RIAK_PORT}`;
 

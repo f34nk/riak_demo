@@ -15,7 +15,7 @@ struct TestObject {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let riak_host = env::var("RIAK_HOST").unwrap_or_else(|_| "riak".to_string());
+    let riak_host = env::var("RIAK_HOST").unwrap_or_else(|_| "openriak".to_string());
     let riak_port = env::var("RIAK_PORT").unwrap_or_else(|_| "8098".to_string());
     let base_url = format!("http://{riak_host}:{riak_port}");
 

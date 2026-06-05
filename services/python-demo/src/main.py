@@ -4,7 +4,7 @@ import time
 
 import requests
 
-RIAK_HOST = os.environ.get("RIAK_HOST", "riak")
+RIAK_HOST = os.environ.get("RIAK_HOST", "openriak")
 RIAK_PORT = os.environ.get("RIAK_PORT", "8098")
 BASE_URL = f"http://{RIAK_HOST}:{RIAK_PORT}"
 

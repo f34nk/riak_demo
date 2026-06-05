@@ -19,7 +19,7 @@ fn env_or_default(name: String, default: String) -> String {
 }
 
 pub fn main() {
-  let riak_host = env_or_default("RIAK_HOST", "riak")
+  let riak_host = env_or_default("RIAK_HOST", "openriak")
   let riak_port = env_or_default("RIAK_PORT", "8098")
   let base_url = "http://" <> riak_host <> ":" <> riak_port
 

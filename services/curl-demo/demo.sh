@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RIAK_HOST="${RIAK_HOST:-riak}"
+RIAK_HOST="${RIAK_HOST:-openriak}"
 RIAK_PORT="${RIAK_PORT:-8098}"
 BASE_URL="http://${RIAK_HOST}:${RIAK_PORT}"
 

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public final class Main {
 
-    private static final String RIAK_HOST = env("RIAK_HOST", "riak");
+    private static final String RIAK_HOST = env("RIAK_HOST", "openriak");
     private static final String RIAK_PORT = env("RIAK_PORT", "8098");
     private static final String BASE_URL = "http://" + RIAK_HOST + ":" + RIAK_PORT;
 
