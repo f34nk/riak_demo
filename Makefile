@@ -1,37 +1,46 @@
-X:=$(shell find services/*/smithy-build.json -type f -maxdepth 1 -exec dirname {} \;)
-BUILD_CONFIGS:=$(foreach x,$(X),$(x)/)
-BUILD_CONFIGS_COUNT:=$(words $(BUILD_CONFIGS))
+X:=$(shell find services/*/Dockerfile -type f -maxdepth 1 -exec dirname {} \;)
+SERVICES:=$(foreach x,$(X),$(x)/)
+
+Y:=$(shell find services/*/smithy-build.json -type f -maxdepth 1 -exec dirname {} \;)
+DEMOS:=$(foreach y,$(Y),$(y)/)
+DEMOS_COUNT:=$(words $(DEMOS))
+
 
 PARALLEL_JOBS=10
+BUILD_LOGS=build.log
 
 .PHONY: all
-all: clean build
+all: clean services build
 
 .PHONY: build
 build:
-	time $(MAKE) run 2>&1 | tee -i build.log
-	if grep -q "All demos finished" build.log; then \
+	#
+	# Build
+	#
+	time make docker/up  2>&1 | tee -i $(BUILD_LOGS)
+	if grep -q "All demos finished" $(BUILD_LOGS); then \
 		echo "build.log ...ok"; \
 	else \
 		echo "build.log ...failed"; \
 		exit 1 ; \
 	fi;
 
-.PHONY: run
-run:
+.PHONY: docker/up
+docker/up: docker/down
 	#
-	# build
+	# Docker/up
 	#
-	docker compose up --build -d
+	docker compose up --build -d > compose.log 2>&1
 	i=0; \
 	while [ $$i -lt 180 ]; do \
 		state=$$(docker compose ps -a --format '{{.State}}' demo-done 2>/dev/null | head -1); \
+		printf "state=%s\n" "$$state" >&2; \
 		case "$$state" in \
 			exited) \
 				code=$$(docker compose ps -a --format '{{.ExitCode}}' demo-done 2>/dev/null | head -1); \
 				if [ "$$code" = "0" ]; then break; fi; \
 				echo "demo-done exited with code $$code"; \
-				docker compose logs; \
+				make docker/logs; \
 				exit 1; \
 				;; \
 		esac; \
@@ -40,18 +49,29 @@ run:
 	done; \
 	if [ $$i -ge 180 ]; then \
 		echo "timed out waiting for demo-done"; \
-		docker compose logs; \
+		make docker/logs; \
 		exit 1; \
 	fi
-	docker compose logs
+	make docker/logs
+	make docker/down > /dev/null 2>&1
+	echo "All demos finished" >> $(BUILD_LOGS)
+
+.PHONY: docker/down
+docker/down:
+	#
+	# Docker/down
+	#
 	docker compose down -v --rmi local
 
-.PHONY: rebuild
-rebuild: clean
-	#
-	# rebuild
-	#
-	docker compose build --no-cache riak | tee rebuild.log
+.SILENT: docker/logs
+.PHONY: docker/logs
+docker/logs:
+	for demo in $(SERVICES); do \
+		name="$$(echo $$demo|cut -d/ -f2)"; \
+		echo "========== $$name =========="; \
+		docker compose logs --no-color "$$name"; \
+		echo; \
+	done
 
 .PHONY: clean
 clean:
@@ -59,7 +79,6 @@ clean:
 	# clean
 	#
 	rm -f *.log
-	docker compose down -v --rmi local
 
 .PHONY: validate
 validate:
@@ -74,7 +93,7 @@ validate:
 	#
 	target="$$(dirname $@)"; \
 	if [ "$$target" = "services" ]; then \
-		files="$(BUILD_CONFIGS)"; \
+		files="$(DEMOS)"; \
 	else \
 		echo "Unknown target: $$target" ; \
 		exit 1 ; \
@@ -122,12 +141,15 @@ _demo:
 # Usage: make services
 .PHONY: services
 services:
+	#
+	# Build services
+	#
 	TARGET=services make _run
 
 # Usage: make services/python-demo
-.SILENT:
-.PHONY: $(BUILD_CONFIGS)
-services/%: $(BUILD_CONFIGS)
+.SILENT: $(DEMOS)
+.PHONY: $(DEMOS)
+services/%: $(DEMOS)
 	target="$@"; \
 	name="$$(echo $$target|cut -d/ -f2)"; \
 	build_log=build/services.log; \
