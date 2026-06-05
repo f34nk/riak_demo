@@ -3,13 +3,28 @@ import {
   OpenRiakClient,
   PutDefaultObjectCommand,
 } from "@openriak/client";
+import { NoAuthSigner } from "@smithy/core";
+import type { Identity } from "@smithy/types";
 
 const RIAK_HOST = process.env.RIAK_HOST ?? "openriak";
 const RIAK_PORT = process.env.RIAK_PORT ?? "8098";
 const endpoint = `http://${RIAK_HOST}:${RIAK_PORT}`;
 
+// smithy-typescript-codegen 0.50.0 has no SupportHttpBasicAuth integration, so
+// httpAuthSchemes must be supplied for services annotated with @httpBasicAuth.
 const client = new OpenRiakClient({
   endpoint,
+  httpAuthSchemes: [
+    {
+      schemeId: "smithy.api#httpBasicAuth",
+      identityProvider: () => async (): Promise<Identity> =>
+        ({
+          username: process.env.RIAK_USER ?? "",
+          password: process.env.RIAK_PASSWORD ?? "",
+        }) as Identity,
+      signer: new NoAuthSigner(),
+    },
+  ],
 });
 
 const BUCKET = "demo";
