@@ -1,6 +1,13 @@
+import { OpenRiakClient } from "@openriak/client";
+
 const RIAK_HOST = process.env.RIAK_HOST ?? "openriak";
 const RIAK_PORT = process.env.RIAK_PORT ?? "8098";
-const BASE_URL = `http://${RIAK_HOST}:${RIAK_PORT}`;
+const endpoint = `http://${RIAK_HOST}:${RIAK_PORT}`;
+const BASE_URL = endpoint;
+
+const client = new OpenRiakClient({
+  endpoint,
+});
 
 const BUCKET = "demo";
 const KEY = "hello-typescript";
