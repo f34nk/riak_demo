@@ -32,4 +32,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf build generated build-errors.log dist
+	rm -rf build generated build-errors.log dist node_modules
