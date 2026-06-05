@@ -11,21 +11,23 @@ build:
 	#
 	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
 	rm -f build-errors.log
+	mkdir -p $(dir $(MODEL_RESOURCE))
+	cp $(MODEL_JSON) $(MODEL_RESOURCE)
 
 .PHONY: test
 test:
-	JAVA_HOME="$(JDK21)" mvn test
+	JAVA_HOME="$(JDK21)" mvn process-resources test
 
 $(MODEL_RESOURCE): $(MODEL_JSON)
 	mkdir -p $(dir $@)
 	cp $< $@
 
 .PHONY: demo
-demo: build $(MODEL_RESOURCE) test
+demo: build test
 
 .PHONY: clean
 clean:
 	#
 	# Clean
 	#
-	rm -rf build generated build-errors.log src/main/resources/openriak/*.json .deps
+	rm -rf build generated target build-errors.log src/main/resources/openriak/*.json .deps
