@@ -1,13 +1,13 @@
 services:
 
-  riak:
+  openriak:
     build:
       context: services/openriak
     ports:
       - "8098:8098"
       - "8087:8087"
     networks:
-      - riak-net
+      - openriak-net
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       interval: 5s
@@ -19,104 +19,104 @@ services:
     build:
       context: services/python-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   curl-demo:
     build:
       context: services/curl-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   java-demo:
     build:
       context: services/java-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   rust-demo:
     build:
       context: services/rust-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   typescript-demo:
     build:
       context: services/typescript-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   elixir-demo:
     build:
       context: services/elixir-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   gleam-demo:
     build:
       context: services/gleam-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   erlang-demo:
     build:
       context: services/erlang-demo
     networks:
-      - riak-net
+      - openriak-net
     environment:
-      - RIAK_HOST=riak
+      - RIAK_HOST=openriak
       - RIAK_PORT=8098
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
 
   demo-done:
     image: alpine:3.21
     networks:
-      - riak-net
+      - openriak-net
     depends_on:
-      riak:
+      openriak:
         condition: service_healthy
       python-demo:
         condition: service_completed_successfully
@@ -134,11 +134,7 @@ services:
         condition: service_completed_successfully
       erlang-demo:
         condition: service_completed_successfully
-    command:
-      - sh
-      - -c
-      - echo -e "\n\nAll demos finished.\n\n"
 
 networks:
-  riak-net:
+  openriak-net:
     driver: bridge
