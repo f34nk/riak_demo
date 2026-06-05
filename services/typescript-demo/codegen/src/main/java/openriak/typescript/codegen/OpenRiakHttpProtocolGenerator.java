@@ -25,7 +25,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
 public final class OpenRiakHttpProtocolGenerator extends HttpBindingProtocolGenerator {
 
     public OpenRiakHttpProtocolGenerator() {
-        super(false);
+        super(true);
     }
 
     @Override
@@ -66,8 +66,8 @@ public final class OpenRiakHttpProtocolGenerator extends HttpBindingProtocolGene
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        super.generateSharedComponents(context);
         OpenRiakProtocolUtils.generateJsonParseBody(context);
+        super.generateSharedComponents(context);
     }
 
     @Override

@@ -41,5 +41,17 @@ final class OpenRiakProtocolUtils {
             }
         );
         writer.write("");
+        writer.openBlock(
+            "const parseErrorBody = (streamBody: any, context: __SerdeContext): Promise<any> => "
+                + "collectBodyString(streamBody, context).then(encoded => {",
+            "});",
+            () -> {
+                writer.openBlock("if (encoded.length) {", "}", () -> {
+                    writer.openBlock("try {", "} catch { return encoded; }", () -> writer.write("return JSON.parse(encoded);"));
+                });
+                writer.write("return {};");
+            }
+        );
+        writer.write("");
     }
 }
