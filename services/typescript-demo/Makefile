@@ -24,8 +24,11 @@ build/smithy: install-codegen
 build/client:
 	cd $(CLIENT_DIR) && npm install && npm run build
 
+.PHONY: test
+test:
+
 .PHONY: demo
-demo: build
+demo: build test
 
 .PHONY: clean
 clean:
