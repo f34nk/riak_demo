@@ -1,7 +1,0 @@
-openriak/typescript/codegen/OpenRiakProtocolUtils.class
-openriak/typescript/codegen/OpenRiakJsonShapeDeserVisitor.class
-openriak/typescript/codegen/OpenRiakHttpProtocolGenerator.class
-openriak/typescript/codegen/OpenRiakJsonMemberDeserVisitor.class
-openriak/typescript/codegen/OpenRiakTypeScriptIntegration.class
-openriak/typescript/codegen/OpenRiakJsonShapeSerVisitor.class
-openriak/typescript/codegen/OpenRiakJsonMemberSerVisitor.class

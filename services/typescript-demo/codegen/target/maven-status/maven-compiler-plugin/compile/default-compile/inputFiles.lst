@@ -1,7 +1,0 @@
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakHttpProtocolGenerator.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakJsonMemberDeserVisitor.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakJsonMemberSerVisitor.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakJsonShapeDeserVisitor.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakJsonShapeSerVisitor.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakProtocolUtils.java
-/Users/frankeickhoff/dev/openriak/riak_demo/services/typescript-demo/codegen/src/main/java/openriak/typescript/codegen/OpenRiakTypeScriptIntegration.java
