@@ -1,9 +1,12 @@
-import { OpenRiakClient, PutDefaultObjectCommand } from "@openriak/client";
+import {
+  GetDefaultObjectCommand,
+  OpenRiakClient,
+  PutDefaultObjectCommand,
+} from "@openriak/client";
 
 const RIAK_HOST = process.env.RIAK_HOST ?? "openriak";
 const RIAK_PORT = process.env.RIAK_PORT ?? "8098";
 const endpoint = `http://${RIAK_HOST}:${RIAK_PORT}`;
-const BASE_URL = endpoint;
 
 const client = new OpenRiakClient({
   endpoint,
@@ -17,26 +20,9 @@ const TEST_OBJECT = {
   message: "Hello from OpenRiak",
 };
 
-async function readObject(
-  bucket: string,
-  key: string,
-): Promise<Record<string, unknown>> {
-  const url = `${BASE_URL}/buckets/${bucket}/keys/${key}`;
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) {
-    throw new Error(`GET failed with status ${response.status}`);
-  }
-  console.log(
-    `Read object  <- bucket='${bucket}' key='${key}' status=${response.status}`,
-  );
-  return (await response.json()) as Record<string, unknown>;
-}
-
 async function main(): Promise<void> {
   console.log("=== OpenRiak TypeScript Demo ===");
-  console.log(`Using OpenRiak at ${BASE_URL}`);
+  console.log(`Using OpenRiak at ${endpoint}`);
 
   const jsonBytes = new TextEncoder().encode(JSON.stringify(TEST_OBJECT));
 
@@ -55,7 +41,22 @@ async function main(): Promise<void> {
     `Wrote object -> bucket='${BUCKET}' key='${KEY}' status=${putOutput.statusCode}`,
   );
 
-  const result = await readObject(BUCKET, KEY);
+  const getOutput = await client.send(
+    new GetDefaultObjectCommand({
+      bucket: BUCKET,
+      key: KEY,
+    }),
+  );
+
+  console.log(
+    `Read object  <- bucket='${BUCKET}' key='${KEY}' status=${getOutput.statusCode}`,
+  );
+
+  const bodyBytes = await getOutput.body!.transformToByteArray();
+  const result = JSON.parse(new TextDecoder().decode(bodyBytes)) as Record<
+    string,
+    unknown
+  >;
   console.log(`Result: ${JSON.stringify(result, null, 2)}`);
 
   if (result.message !== TEST_OBJECT.message) {
