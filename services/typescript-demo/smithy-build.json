@@ -6,7 +6,8 @@
   ],
   "maven": {
     "dependencies": [
-      "software.amazon.smithy.typescript:smithy-typescript-codegen:0.50.0"
+      "software.amazon.smithy.typescript:smithy-typescript-codegen:0.50.0",
+      "openriak:openriak-typescript-codegen:0.1.0"
     ]
   },
   "projections": {
@@ -15,7 +16,8 @@
         "typescript-client-codegen": {
           "service": "openriak.current.api#OpenRiak",
           "package": "@openriak/client",
-          "packageVersion": "0.1.0"
+          "packageVersion": "0.1.0",
+          "protocol": "openriak.current.api#openRiakHttp"
         }
       }
     }
