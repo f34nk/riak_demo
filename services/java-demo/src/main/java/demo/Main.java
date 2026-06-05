@@ -3,7 +3,6 @@ package demo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +12,10 @@ import openriak.current.api.model.GetDefaultObjectOutput;
 import openriak.current.api.model.PutDefaultObjectOperationInput;
 import openriak.current.api.model.PutDefaultObjectOutput;
 import openriak.protocol.OpenRiakHttpProtocol;
+import software.amazon.smithy.java.auth.api.identity.IdentityResolver;
+import software.amazon.smithy.java.auth.api.identity.IdentityResult;
+import software.amazon.smithy.java.auth.api.identity.LoginIdentity;
+import software.amazon.smithy.java.context.Context;
 import software.amazon.smithy.java.io.datastream.DataStream;
 
 public final class Main {
@@ -34,12 +37,13 @@ public final class Main {
         try {
             System.out.println("=== OpenRiak Java Demo ===");
 
-            URI endpoint = URI.create("http://" + RIAK_HOST + ":" + RIAK_PORT);
+            String endpoint = "http://" + RIAK_HOST + ":" + RIAK_PORT;
             OpenRiakClient client = OpenRiakClient.builder()
-                    .configBuilder()
-                        .endpoint(endpoint)
-                        .protocol(new OpenRiakHttpProtocol())
-                    .build()
+                    .endpoint(endpoint)
+                    .protocol(new OpenRiakHttpProtocol())
+                    .addIdentityResolver(loginIdentityResolver(
+                            env("RIAK_USER", ""),
+                            env("RIAK_PASSWORD", "")))
                     .build();
             System.out.println("Using OpenRiak at " + endpoint);
 
@@ -96,5 +100,20 @@ public final class Main {
     private static String env(String name, String defaultValue) {
         String value = System.getenv(name);
         return value == null || value.isBlank() ? defaultValue : value;
+    }
+
+    private static IdentityResolver<LoginIdentity> loginIdentityResolver(String username, String password) {
+        LoginIdentity identity = LoginIdentity.create(username, password);
+        return new IdentityResolver<>() {
+            @Override
+            public IdentityResult<LoginIdentity> resolveIdentity(Context context) {
+                return IdentityResult.of(identity);
+            }
+
+            @Override
+            public Class<LoginIdentity> identityType() {
+                return LoginIdentity.class;
+            }
+        };
     }
 }
