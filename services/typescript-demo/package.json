@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "test": "npm run build && node --test dist/test/openriakHttpSerde.test.js"
   },
   "dependencies": {
     "@openriak/client": "file:generated/client/typescript-client-codegen",
