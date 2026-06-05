@@ -7,11 +7,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import openriak.current.api.client.OpenRiakClient;
+import openriak.current.api.model.PutDefaultObjectOperationInput;
+import openriak.current.api.model.PutDefaultObjectOutput;
 import openriak.protocol.OpenRiakHttpProtocol;
+import software.amazon.smithy.java.io.datastream.DataStream;
 
 public final class Main {
 
@@ -44,7 +48,23 @@ public final class Main {
                     .build();
             System.out.println("Using OpenRiak at " + endpoint);
 
-            writeObject(BUCKET, KEY, TEST_OBJECT);
+            byte[] jsonBytes = GSON.toJson(TEST_OBJECT).getBytes(StandardCharsets.UTF_8);
+            try (PutDefaultObjectOperationInput putInput = PutDefaultObjectOperationInput.builder()
+                    .bucket(BUCKET)
+                    .key(KEY)
+                    .contentType("application/json")
+                    .w("1")
+                    .dw("1")
+                    .body(DataStream.ofBytes(jsonBytes))
+                    .build()) {
+                PutDefaultObjectOutput putOutput = client.putDefaultObject(putInput);
+                System.out.printf(
+                        "Wrote object -> bucket='%s' key='%s' status=%d%n",
+                        BUCKET,
+                        KEY,
+                        putOutput.getStatusCode());
+            }
+
             JsonObject result = readObject(BUCKET, KEY);
             System.out.println("Result: " + GSON.toJson(result));
 
@@ -60,23 +80,6 @@ public final class Main {
             e.printStackTrace(System.err);
             System.exit(1);
         }
-    }
-
-    private static void writeObject(String bucket, String key, Map<String, Object> data) throws Exception {
-        String baseUrl = "http://" + RIAK_HOST + ":" + RIAK_PORT;
-        String url = baseUrl + "/buckets/" + bucket + "/keys/" + key + "?w=1&dw=1";
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(10))
-                .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(GSON.toJson(data)))
-                .build();
-
-        HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IllegalStateException("PUT failed with status " + response.statusCode());
-        }
-        System.out.printf("Wrote object -> bucket='%s' key='%s' status=%d%n", bucket, key, response.statusCode());
     }
 
     private static JsonObject readObject(String bucket, String key) throws Exception {
