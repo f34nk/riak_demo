@@ -7,6 +7,12 @@
     "build": "tsc",
     "start": "node dist/main.js"
   },
+  "dependencies": {
+    "@openriak/client": "file:generated/client/typescript-client-codegen",
+    "@smithy/core": "^3.24.5",
+    "@smithy/node-http-handler": "^4.7.5",
+    "@smithy/types": "^4.14.2"
+  },
   "devDependencies": {
     "@types/node": "^22.13.10",
     "typescript": "^5.8.2"
