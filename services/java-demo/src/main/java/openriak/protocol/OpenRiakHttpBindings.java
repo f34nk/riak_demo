@@ -2,6 +2,8 @@ package openriak.protocol;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import software.amazon.smithy.java.core.schema.ApiOperation;
@@ -19,6 +21,7 @@ import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.HttpTrait;
 
@@ -92,7 +95,7 @@ final class OpenRiakHttpBindings {
                 case HEADER -> {
                     String raw = response.headers().firstValue(binding.getLocationName());
                     if (raw != null) {
-                        builder.setMemberValue(member, raw);
+                        builder.setMemberValue(member, coerceHeaderValue(member, raw));
                     }
                 }
                 case PREFIX_HEADERS -> builder.setMemberValue(member, readPrefixHeaders(response, binding.getLocationName()));
@@ -136,5 +139,16 @@ final class OpenRiakHttpBindings {
 
     private static String urlEncode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private static Object coerceHeaderValue(Schema member, String raw) {
+        ShapeType targetType = member.memberTarget().type();
+        return switch (targetType) {
+            case TIMESTAMP -> Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(raw));
+            case INTEGER -> Integer.parseInt(raw);
+            case LONG -> Long.parseLong(raw);
+            case BOOLEAN -> Boolean.parseBoolean(raw);
+            default -> raw;
+        };
     }
 }
