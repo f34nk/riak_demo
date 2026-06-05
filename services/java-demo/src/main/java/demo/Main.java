@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import openriak.current.api.client.OpenRiakClient;
+import openriak.current.api.model.GetDefaultObjectOperationInput;
+import openriak.current.api.model.GetDefaultObjectOutput;
 import openriak.current.api.model.PutDefaultObjectOperationInput;
 import openriak.current.api.model.PutDefaultObjectOutput;
 import openriak.protocol.OpenRiakHttpProtocol;
@@ -26,9 +24,6 @@ public final class Main {
     private static final String KEY = "hello-java";
 
     private static final Gson GSON = new Gson();
-    private static final HttpClient HTTP = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
 
     private static final Map<String, Object> TEST_OBJECT = Map.of(
             "client", "java",
@@ -65,7 +60,23 @@ public final class Main {
                         putOutput.getStatusCode());
             }
 
-            JsonObject result = readObject(BUCKET, KEY);
+            GetDefaultObjectOperationInput getInput = GetDefaultObjectOperationInput.builder()
+                    .bucket(BUCKET)
+                    .key(KEY)
+                    .build();
+
+            JsonObject result;
+            try (GetDefaultObjectOutput getOutput = client.getDefaultObject(getInput)) {
+                System.out.printf(
+                        "Read object  <- bucket='%s' key='%s' status=%d%n",
+                        BUCKET,
+                        KEY,
+                        getOutput.getStatusCode());
+                DataStream bodyStream = getOutput.getBody();
+                byte[] bodyBytes = bodyStream.asByteBuffer().array();
+                result = GSON.fromJson(new String(bodyBytes, StandardCharsets.UTF_8), JsonObject.class);
+            }
+
             System.out.println("Result: " + GSON.toJson(result));
 
             String message = result.get("message").getAsString();
@@ -80,23 +91,6 @@ public final class Main {
             e.printStackTrace(System.err);
             System.exit(1);
         }
-    }
-
-    private static JsonObject readObject(String bucket, String key) throws Exception {
-        String baseUrl = "http://" + RIAK_HOST + ":" + RIAK_PORT;
-        String url = baseUrl + "/buckets/" + bucket + "/keys/" + key;
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(10))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IllegalStateException("GET failed with status " + response.statusCode());
-        }
-        System.out.printf("Read object  <- bucket='%s' key='%s' status=%d%n", bucket, key, response.statusCode());
-        return GSON.fromJson(response.body(), JsonObject.class);
     }
 
     private static String env(String name, String defaultValue) {
