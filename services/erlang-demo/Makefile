@@ -6,6 +6,8 @@ SMITHY_BEAM_SRC ?= $(CURDIR)/.smithy-beam
 SMITHY_BEAM_REPO ?= https://github.com/f34nk/smithy-beam.git
 SMITHY_BEAM_REF ?= v3
 CODEGEN_JAR := $(HOME)/.m2/repository/io/smithy/beam/codegen-erlang/0.1.0-SNAPSHOT/codegen-erlang-0.1.0-SNAPSHOT.jar
+CODEGEN_DIR := build/smithy/source/erlang-client-codegen
+OPENRIAK_CODEGEN_JAR := $(HOME)/.m2/repository/openriak/openriak-erlang-codegen/0.1.0/openriak-erlang-codegen-0.1.0.jar
 
 JDK21 := $(shell asdf where java openjdk-21)
 SMITHY_HOME := $(shell brew --prefix smithy-cli)/libexec
@@ -31,8 +33,13 @@ build: install-codegen
 	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
 	rm -f build-errors.log
 
+.PHONY: build/rebar
+build/rebar: build
+	rebar3 compile
+
 .PHONY: demo
-demo: build
+demo: build/rebar
+	rebar3 shell --eval 'riak_erlang_demo:run().' --noshell --quiet
 
 .PHONY: clean
 clean:
