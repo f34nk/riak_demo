@@ -1,4 +1,4 @@
-import { OpenRiakClient } from "@openriak/client";
+import { OpenRiakClient, PutDefaultObjectCommand } from "@openriak/client";
 
 const RIAK_HOST = process.env.RIAK_HOST ?? "openriak";
 const RIAK_PORT = process.env.RIAK_PORT ?? "8098";
@@ -16,26 +16,6 @@ const TEST_OBJECT = {
   client: "typescript",
   message: "Hello from OpenRiak",
 };
-
-async function writeObject(
-  bucket: string,
-  key: string,
-  data: Record<string, string>,
-): Promise<void> {
-  const url = `${BASE_URL}/buckets/${bucket}/keys/${key}?w=1&dw=1`;
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) {
-    throw new Error(`PUT failed with status ${response.status}`);
-  }
-  console.log(
-    `Wrote object -> bucket='${bucket}' key='${key}' status=${response.status}`,
-  );
-}
 
 async function readObject(
   bucket: string,
@@ -58,7 +38,22 @@ async function main(): Promise<void> {
   console.log("=== OpenRiak TypeScript Demo ===");
   console.log(`Using OpenRiak at ${BASE_URL}`);
 
-  await writeObject(BUCKET, KEY, TEST_OBJECT);
+  const jsonBytes = new TextEncoder().encode(JSON.stringify(TEST_OBJECT));
+
+  const putOutput = await client.send(
+    new PutDefaultObjectCommand({
+      bucket: BUCKET,
+      key: KEY,
+      contentType: "application/json",
+      w: "1",
+      dw: "1",
+      body: jsonBytes,
+    }),
+  );
+
+  console.log(
+    `Wrote object -> bucket='${BUCKET}' key='${KEY}' status=${putOutput.statusCode}`,
+  );
 
   const result = await readObject(BUCKET, KEY);
   console.log(`Result: ${JSON.stringify(result, null, 2)}`);
