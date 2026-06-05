@@ -10,12 +10,13 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
+import openriak.current.api.client.OpenRiakClient;
+import openriak.protocol.OpenRiakHttpProtocol;
 
 public final class Main {
 
     private static final String RIAK_HOST = env("RIAK_HOST", "openriak");
     private static final String RIAK_PORT = env("RIAK_PORT", "8098");
-    private static final String BASE_URL = "http://" + RIAK_HOST + ":" + RIAK_PORT;
 
     private static final String BUCKET = "demo";
     private static final String KEY = "hello-java";
@@ -33,7 +34,15 @@ public final class Main {
     public static void main(String[] args) {
         try {
             System.out.println("=== OpenRiak Java Demo ===");
-            System.out.println("Using OpenRiak at " + BASE_URL);
+
+            URI endpoint = URI.create("http://" + RIAK_HOST + ":" + RIAK_PORT);
+            OpenRiakClient client = OpenRiakClient.builder()
+                    .configBuilder()
+                        .endpoint(endpoint)
+                        .protocol(new OpenRiakHttpProtocol())
+                    .build()
+                    .build();
+            System.out.println("Using OpenRiak at " + endpoint);
 
             writeObject(BUCKET, KEY, TEST_OBJECT);
             JsonObject result = readObject(BUCKET, KEY);
@@ -54,7 +63,8 @@ public final class Main {
     }
 
     private static void writeObject(String bucket, String key, Map<String, Object> data) throws Exception {
-        String url = BASE_URL + "/buckets/" + bucket + "/keys/" + key + "?w=1&dw=1";
+        String baseUrl = "http://" + RIAK_HOST + ":" + RIAK_PORT;
+        String url = baseUrl + "/buckets/" + bucket + "/keys/" + key + "?w=1&dw=1";
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(10))
@@ -70,7 +80,8 @@ public final class Main {
     }
 
     private static JsonObject readObject(String bucket, String key) throws Exception {
-        String url = BASE_URL + "/buckets/" + bucket + "/keys/" + key;
+        String baseUrl = "http://" + RIAK_HOST + ":" + RIAK_PORT;
+        String url = baseUrl + "/buckets/" + bucket + "/keys/" + key;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(10))
