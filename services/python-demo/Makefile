@@ -35,4 +35,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf build generated
+	rm -rf build generated $(CODEGEN_JAR)
