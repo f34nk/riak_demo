@@ -409,7 +409,7 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.write("");
         writer.write("prefix_headers_from_list(Headers, Prefix) ->");
         writer.write("    Map = maps:from_list([");
-        writer.write("        {binary:part(Name, byte_size(Prefix)), Val}");
+        writer.write("        {binary:part(Name, byte_size(Prefix), byte_size(Name) - byte_size(Prefix)), Val}");
         writer.write("        || {Name, Val} <- Headers,");
         writer.write("           byte_size(Name) > byte_size(Prefix),");
         writer.write("           binary:part(Name, 0, byte_size(Prefix)) =:= Prefix");
