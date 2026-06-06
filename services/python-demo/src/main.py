@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 
-from openriak.client import OpenRiakClient
+from openriak.client import OpenRiak
 from openriak.config import Config
 from openriak.models import GetDefaultObjectOperationInput, PutDefaultObjectOperationInput
 
@@ -24,7 +24,7 @@ async def main() -> None:
     print(f"Using OpenRiak at {endpoint}")
 
     config = Config(endpoint_uri=endpoint)
-    client = OpenRiakClient(config)
+    client = OpenRiak(config)
 
     json_bytes = json.dumps(TEST_OBJECT).encode("utf-8")
 
