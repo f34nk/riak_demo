@@ -58,4 +58,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf _build build generated .smithy-beam $(CODEGEN_JAR)
+	rm -rf *.dump _build build generated .smithy-beam $(CODEGEN_JAR)
