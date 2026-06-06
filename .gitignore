@@ -1,7 +1,5 @@
 *.log
 *.class
-_build/
 build/
-deps/
 generated/
 target/
