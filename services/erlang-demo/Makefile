@@ -25,8 +25,14 @@ $(CODEGEN_JAR):
 	}
 	cd "$(SMITHY_BEAM_SRC)" && make build
 
+.PHONY: install-openriak-codegen
+install-openriak-codegen: $(OPENRIAK_CODEGEN_JAR)
+
+$(OPENRIAK_CODEGEN_JAR):
+	cd codegen && mvn -q install
+
 .PHONY: build
-build: install-codegen
+build: install-codegen install-openriak-codegen
 	#
 	# Build
 	#
