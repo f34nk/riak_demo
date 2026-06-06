@@ -131,12 +131,12 @@ _run:
 	echo; \
 	exit $$STATUS; \
 
-.PHONY: _demo
-_demo:
+.PHONY: _build
+_build:
 	#
 	# Build $(DEMO)
 	#
-	cd $(DEMO) && make clean && time make demo
+	cd $(DEMO) && make clean && time make build && make test
 	
 # Usage: make services
 .PHONY: services
@@ -155,7 +155,7 @@ services/%: $(DEMOS)
 	build_log=build/services.log; \
 	logfile="build/services-$$name.log"; \
 	echo "Running $$target > $$logfile"; \
-	DEMO=$$target make _demo > $$logfile 2>&1; \
+	DEMO=$$target make _build > $$logfile 2>&1; \
 	if grep -q "make.*Error" $$logfile; then \
 		echo "$$logfile ...failed" >> $$build_log; \
 		exit 1 ; \

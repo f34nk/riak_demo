@@ -29,9 +29,6 @@ build/client:
 test:
 	npm install && npm test
 
-.PHONY: demo
-demo: build test
-
 .PHONY: clean
 clean:
 	#

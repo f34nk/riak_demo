@@ -15,6 +15,21 @@ SMITHY_HOME := $(shell brew --prefix smithy-cli)/libexec
 .PHONY: all
 all: build
 
+.PHONY: build
+build: build/smithy build/rebar
+
+.PHONY: build/smithy
+build/smithy: install-codegen install-openriak-codegen
+	#
+	# Build
+	#
+	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
+	rm -f build-errors.log
+
+.PHONY: build/rebar
+build/rebar:
+	rebar3 compile
+
 .PHONY: install-codegen
 install-codegen: $(CODEGEN_JAR)
 
@@ -30,18 +45,6 @@ install-openriak-codegen: $(OPENRIAK_CODEGEN_JAR)
 
 $(OPENRIAK_CODEGEN_JAR):
 	cd codegen && JAVA_HOME="$(JDK21)" mvn -q install
-
-.PHONY: build
-build: install-codegen install-openriak-codegen
-	#
-	# Build
-	#
-	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
-	rm -f build-errors.log
-
-.PHONY: build/rebar
-build/rebar: build
-	rebar3 compile
 
 .PHONY: test
 test: build/rebar
