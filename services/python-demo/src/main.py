@@ -4,7 +4,7 @@ import os
 
 from openriak.client import OpenRiakClient
 from openriak.config import Config
-from openriak.models import GetDefaultObjectInput, PutDefaultObjectInput
+from openriak.models import GetDefaultObjectOperationInput, PutDefaultObjectOperationInput
 
 RIAK_HOST = os.environ.get("RIAK_HOST", "openriak")
 RIAK_PORT = os.environ.get("RIAK_PORT", "8098")
@@ -29,7 +29,7 @@ async def main() -> None:
     json_bytes = json.dumps(TEST_OBJECT).encode("utf-8")
 
     put_output = await client.put_default_object(
-        PutDefaultObjectInput(
+        PutDefaultObjectOperationInput(
             bucket=BUCKET,
             key=KEY,
             content_type="application/json",
@@ -44,7 +44,7 @@ async def main() -> None:
     )
 
     get_output = await client.get_default_object(
-        GetDefaultObjectInput(
+        GetDefaultObjectOperationInput(
             bucket=BUCKET,
             key=KEY,
         )
