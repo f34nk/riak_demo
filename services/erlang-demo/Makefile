@@ -8,6 +8,7 @@ SMITHY_BEAM_REF ?= v3
 CODEGEN_JAR := $(HOME)/.m2/repository/io/smithy/beam/codegen-erlang/0.1.0-SNAPSHOT/codegen-erlang-0.1.0-SNAPSHOT.jar
 CODEGEN_DIR := generated/source/erlang-client-codegen
 OPENRIAK_CODEGEN_JAR := $(HOME)/.m2/repository/openriak/openriak-erlang-codegen/0.1.0/openriak-erlang-codegen-0.1.0.jar
+OPENRIAK_CODEGEN_SRCS := $(shell find codegen/src codegen/pom.xml -type f 2>/dev/null)
 
 JDK21 := $(shell asdf where java openjdk-21)
 SMITHY_HOME := $(shell brew --prefix smithy-cli)/libexec
@@ -43,7 +44,7 @@ $(CODEGEN_JAR):
 .PHONY: install-openriak-codegen
 install-openriak-codegen: $(OPENRIAK_CODEGEN_JAR)
 
-$(OPENRIAK_CODEGEN_JAR):
+$(OPENRIAK_CODEGEN_JAR): $(OPENRIAK_CODEGEN_SRCS)
 	cd codegen && JAVA_HOME="$(JDK21)" mvn -q install
 
 .PHONY: test
@@ -58,4 +59,4 @@ clean:
 	#
 	# Clean
 	#
-	rm -rf *.dump _build build generated .smithy-beam $(CODEGEN_JAR)
+	rm -rf *.dump _build build generated .smithy-beam $(CODEGEN_JAR) $(OPENRIAK_CODEGEN_JAR)
