@@ -1,0 +1,38 @@
+-module(openriak_http_codec_tests).
+-include_lib("eunit/include/eunit.hrl").
+-include("open_riak_types.hrl").
+-include("runtime_types.hrl").
+
+put_default_object_request_test() ->
+    Body = <<"{\"client\":\"erlang\",\"message\":\"Hello from OpenRiak\"}">>,
+    Input = #put_default_object_operation_input{
+        bucket = <<"demo">>,
+        key = <<"hello-erlang">>,
+        w = <<"1">>,
+        dw = <<"1">>,
+        content_type = <<"application/json">>,
+        body = Body
+    },
+    Request = open_riak_open_riak_http:encode_put_default_object_request(Input),
+    ?assertEqual(<<"PUT">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/keys/hello-erlang">>, Request#http_request.path),
+    ?assertEqual(#{<<"w">> => <<"1">>, <<"dw">> => <<"1">>}, Request#http_request.query),
+    ?assertEqual(
+        [{<<"Content-Type">>, <<"application/json">>}],
+        Request#http_request.headers
+    ),
+    ?assertEqual(Body, Request#http_request.body),
+    ok.
+
+get_default_object_request_test() ->
+    Input = #get_default_object_operation_input{
+        bucket = <<"demo">>,
+        key = <<"hello-erlang">>
+    },
+    Request = open_riak_open_riak_http:encode_get_default_object_request(Input),
+    ?assertEqual(<<"GET">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/keys/hello-erlang">>, Request#http_request.path),
+    ?assertEqual(#{}, Request#http_request.query),
+    ?assertEqual([], Request#http_request.headers),
+    ?assertEqual(<<>>, Request#http_request.body),
+    ok.

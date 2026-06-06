@@ -29,7 +29,7 @@ $(CODEGEN_JAR):
 install-openriak-codegen: $(OPENRIAK_CODEGEN_JAR)
 
 $(OPENRIAK_CODEGEN_JAR):
-	cd codegen && mvn -q install
+	cd codegen && JAVA_HOME="$(JDK21)" mvn -q install
 
 .PHONY: build
 build: install-codegen install-openriak-codegen
@@ -43,12 +43,16 @@ build: install-codegen install-openriak-codegen
 build/rebar: build
 	rebar3 compile
 
+.PHONY: test
+test: build/rebar
+	rebar3 eunit
+
 .PHONY: demo
-demo: build/rebar
+demo: build
 
 .PHONY: clean
 clean:
 	#
 	# Clean
 	#
-	rm -rf _build build generated .smithy-beam
+	rm -rf _build build generated .smithy-beam $(CODEGEN_JAR)

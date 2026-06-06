@@ -118,7 +118,7 @@ public final class ErlangOpenRiakHttpEmitter {
         List<HttpBinding> reqPayload = httpIndex.getRequestBindings(op, HttpBinding.Location.PAYLOAD);
 
         List<String> patternParts = buildPatternParts(
-                labels, queries, queryParams, headers, prefixHeaders, reqPayload);
+                sp, labels, queries, queryParams, headers, prefixHeaders, reqPayload);
         String pattern = patternParts.isEmpty() ? "" : "\n    " + String.join(",\n    ", patternParts) + "\n";
 
         writer.write("%% Encode HTTP request for $L.", op.getId());
@@ -126,7 +126,7 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.write("encode_$L_request(Input = #$L{$L}) ->", opName, inputRecord, pattern);
         writer.indent();
 
-        String pathExpr = buildPathExpression(uriTemplate, labels);
+        String pathExpr = buildPathExpression(uriTemplate, labels, sp);
         writer.write("Path = $L,", pathExpr);
 
         if (queries.isEmpty()) {
@@ -135,20 +135,22 @@ public final class ErlangOpenRiakHttpEmitter {
             writer.write("Query = lists:filtermap(fun");
             for (HttpBinding qb : queries) {
                 String paramName = qb.getLocationName();
-                writer.write("    (V) when V =/= undefined -> {true, {<<\"$L\">>, encode_query_value(V)}};",
-                        paramName);
+                String fieldName = memberFieldName(sp, qb.getMember());
+                writer.write(
+                        "    ({<<\"$L\">>, V}) when V =/= undefined -> {true, {<<\"$L\">>, encode_query_value(V)}};",
+                        fieldName, paramName);
             }
             writer.write("    (_) -> false");
             writer.write("end, [$L]),",
                     queries.stream()
-                            .map(qb -> toBindingVar(
-                                    BeamNameUtils.toSnakeCase(qb.getMember().getMemberName())))
+                            .map(qb -> "{" + queryTupleKey(sp, qb) + ", "
+                                    + toBindingVar(memberFieldName(sp, qb.getMember())) + "}")
                             .reduce((a, b) -> a + ", " + b)
                             .orElse(""));
         }
 
         for (HttpBinding qp : queryParams) {
-            String fieldName = BeamNameUtils.toSnakeCase(qp.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, qp.getMember());
             String bindingVar = toBindingVar(fieldName);
             writer.write("QueryExtra = case $L of", bindingVar);
             writer.indent();
@@ -168,26 +170,28 @@ public final class ErlangOpenRiakHttpEmitter {
             writer.write("Headers = lists:filtermap(fun");
             for (HttpBinding hb : headers) {
                 String headerName = hb.getLocationName();
-                writer.write("    (V) when V =/= undefined -> {true, {<<\"$L\">>, to_binary(V)}};",
-                        headerName);
+                String fieldName = memberFieldName(sp, hb.getMember());
+                writer.write(
+                        "    ({<<\"$L\">>, V}) when V =/= undefined -> {true, {<<\"$L\">>, to_binary(V)}};",
+                        fieldName, headerName);
             }
             writer.write("    (_) -> false");
             writer.write("end, [$L]),",
                     headers.stream()
-                            .map(hb -> toBindingVar(
-                                    BeamNameUtils.toSnakeCase(hb.getMember().getMemberName())))
+                            .map(hb -> "{" + headerTupleKey(sp, hb) + ", "
+                                    + toBindingVar(memberFieldName(sp, hb.getMember())) + "}")
                             .reduce((a, b) -> a + ", " + b)
                             .orElse(""));
         }
 
         for (HttpBinding ph : prefixHeaders) {
-            String fieldName = BeamNameUtils.toSnakeCase(ph.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, ph.getMember());
             String prefix = ph.getLocationName();
             writer.write("Headers = Headers ++ prefix_headers_to_list(<<\"$L\">>, $L),",
                     prefix, toBindingVar(fieldName));
         }
 
-        emitOpaqueRequestBody(writer, model, reqPayload, method);
+        emitOpaqueRequestBody(writer, model, reqPayload, method, sp);
 
         writer.write("#http_request{");
         writer.write("    method = <<\"$L\">>,", method);
@@ -233,7 +237,7 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.indent();
 
         for (HttpBinding hb : respHeaders) {
-            String fieldName = BeamNameUtils.toSnakeCase(hb.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, hb.getMember());
             String bindingVar = toBindingVar(fieldName);
             String headerName = hb.getLocationName();
             writer.write("$L = proplists:get_value(<<\"$L\">>, Headers, undefined),",
@@ -242,16 +246,16 @@ public final class ErlangOpenRiakHttpEmitter {
 
         List<String> recordFields = new ArrayList<>();
         for (HttpBinding hb : respHeaders) {
-            String fieldName = BeamNameUtils.toSnakeCase(hb.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, hb.getMember());
             recordFields.add("    " + fieldName + " = " + toBindingVar(fieldName));
         }
         for (HttpBinding ph : respPrefixHeaders) {
-            String fieldName = BeamNameUtils.toSnakeCase(ph.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, ph.getMember());
             String prefix = ph.getLocationName();
             recordFields.add("    " + fieldName + " = prefix_headers_from_list(Headers, <<\"" + prefix + "\">>)");
         }
         for (HttpBinding pb : respPayload) {
-            String fieldName = BeamNameUtils.toSnakeCase(pb.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, pb.getMember());
             if (isStreamingBlob(model, pb.getMember())) {
                 recordFields.add("    " + fieldName + " = Body");
             } else {
@@ -259,7 +263,7 @@ public final class ErlangOpenRiakHttpEmitter {
             }
         }
         for (HttpBinding rcb : respCode) {
-            String fieldName = BeamNameUtils.toSnakeCase(rcb.getMember().getMemberName());
+            String fieldName = memberFieldName(sp, rcb.getMember());
             recordFields.add("    " + fieldName + " = HttpStatus");
         }
 
@@ -328,8 +332,7 @@ public final class ErlangOpenRiakHttpEmitter {
             if (member.getMemberName().equals("__beam_error_kind")) {
                 continue;
             }
-            String field = BeamNameUtils.toSnakeCase(member.getMemberName());
-            fields.add(field + " = undefined");
+            fields.add(member.getMemberName() + " = undefined");
         }
         return fields;
     }
@@ -338,7 +341,8 @@ public final class ErlangOpenRiakHttpEmitter {
             ErlangWriter writer,
             Model model,
             List<HttpBinding> reqPayload,
-            String method) {
+            String method,
+            SymbolProvider sp) {
 
         if (reqPayload.isEmpty()
                 || method.equals("GET")
@@ -350,7 +354,7 @@ public final class ErlangOpenRiakHttpEmitter {
 
         HttpBinding payload = reqPayload.get(0);
         MemberShape member = payload.getMember();
-        String fieldName = BeamNameUtils.toSnakeCase(member.getMemberName());
+        String fieldName = memberFieldName(sp, member);
         String bindingVar = toBindingVar(fieldName);
         Shape target = model.expectShape(member.getTarget());
 
@@ -418,6 +422,7 @@ public final class ErlangOpenRiakHttpEmitter {
     }
 
     private static List<String> buildPatternParts(
+            SymbolProvider sp,
             List<HttpBinding> labels,
             List<HttpBinding> queries,
             List<HttpBinding> queryParams,
@@ -426,13 +431,14 @@ public final class ErlangOpenRiakHttpEmitter {
             List<HttpBinding> reqPayload) {
         List<String> parts = new ArrayList<>();
         for (HttpBinding b : concat(labels, queries, queryParams, headers, prefixHeaders, reqPayload)) {
-            String field = BeamNameUtils.toSnakeCase(b.getMember().getMemberName());
+            String field = memberFieldName(sp, b.getMember());
             parts.add(field + " = " + toBindingVar(field));
         }
         return parts;
     }
 
-    private static String buildPathExpression(String uriTemplate, List<HttpBinding> labels) {
+    private static String buildPathExpression(
+            String uriTemplate, List<HttpBinding> labels, SymbolProvider sp) {
         if (labels.isEmpty()) {
             return "<<\"" + uriTemplate + "\">>";
         }
@@ -449,7 +455,10 @@ public final class ErlangOpenRiakHttpEmitter {
             }
             int end = uriTemplate.indexOf('}', start);
             String labelName = uriTemplate.substring(start + 1, end);
-            String fieldName = BeamNameUtils.toSnakeCase(labelName);
+            if (labelName.endsWith("+")) {
+                labelName = labelName.substring(0, labelName.length() - 1);
+            }
+            String fieldName = labelFieldName(labels, labelName, sp);
             sb.append("(uri_encode(to_binary(").append(toBindingVar(fieldName)).append(")))/binary");
             pos = end + 1;
             if (pos < uriTemplate.length()) {
@@ -458,6 +467,28 @@ public final class ErlangOpenRiakHttpEmitter {
         }
         sb.append(">>");
         return sb.toString();
+    }
+
+    private static String labelFieldName(
+            List<HttpBinding> labels, String locationName, SymbolProvider sp) {
+        for (HttpBinding label : labels) {
+            if (label.getLocationName().equals(locationName)) {
+                return memberFieldName(sp, label.getMember());
+            }
+        }
+        return BeamNameUtils.toSnakeCase(locationName);
+    }
+
+    private static String memberFieldName(SymbolProvider sp, MemberShape member) {
+        return sp.toSymbol(member).getProperty("fieldName", String.class).orElseThrow();
+    }
+
+    private static String queryTupleKey(SymbolProvider sp, HttpBinding binding) {
+        return "<<" + "\"" + memberFieldName(sp, binding.getMember()) + "\"" + ">>";
+    }
+
+    private static String headerTupleKey(SymbolProvider sp, HttpBinding binding) {
+        return queryTupleKey(sp, binding);
     }
 
     private static boolean isStreamingBlob(Model model, MemberShape member) {
