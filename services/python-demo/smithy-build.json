@@ -8,7 +8,8 @@
     "dependencies": [
       "software.amazon.smithy:smithy-model:1.70.0",
       "software.amazon.smithy:smithy-aws-traits:1.70.0",
-      "software.amazon.smithy.python.codegen:core:0.3.0"
+      "software.amazon.smithy.python.codegen:core:0.3.0",
+      "openriak:openriak-python-codegen:0.1.0"
     ]
   },
   "projections": {
