@@ -6,6 +6,8 @@ SMITHY_PYTHON_SRC ?= $(CURDIR)/.smithy-python
 SMITHY_PYTHON_REPO ?= https://github.com/smithy-lang/smithy-python.git
 SMITHY_PYTHON_REF ?= develop
 CODEGEN_JAR := $(HOME)/.m2/repository/software/amazon/smithy/python/codegen/core/0.3.0/core-0.3.0.jar
+CLIENT_DIR := generated/client/python-client-codegen
+OPENRIAK_CODEGEN_JAR := $(HOME)/.m2/repository/openriak/openriak-python-codegen/0.1.0/openriak-python-codegen-0.1.0.jar
 
 .PHONY: all
 all: build
@@ -20,6 +22,11 @@ $(CODEGEN_JAR):
 	}
 	cd "$(SMITHY_PYTHON_SRC)/codegen" && ./gradlew publishToMavenLocal
 
+.PHONY: install-runtime
+install-runtime:
+	@test -d "$(SMITHY_PYTHON_SRC)/packages" || $(MAKE) install-codegen
+	cd "$(SMITHY_PYTHON_SRC)/packages" && pip install -e smithy-core -e "smithy-http[aiohttp]"
+
 .PHONY: build
 build: install-codegen
 	#
@@ -27,12 +34,17 @@ build: install-codegen
 	#
 	smithy build
 
+.PHONY: build/client
+build/client: build
+	pip install -e $(CLIENT_DIR)
+
 .PHONY: demo
-demo: build
+demo: build/client
+	python src/main.py
 
 .PHONY: test
-test:
-	@echo "No tests yet"
+test: build/client
+	python -m pytest test/ -q 2>/dev/null || echo "No tests yet"
 
 .PHONY: clean
 clean:
