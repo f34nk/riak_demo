@@ -21,6 +21,7 @@ build:
 	if grep -q "All demos finished" $(BUILD_LOGS); then \
 		echo "build.log ...ok"; \
 	else \
+		make docker/logs; \
 		echo "build.log ...failed"; \
 		exit 1 ; \
 	fi;
@@ -66,10 +67,11 @@ docker/down:
 .SILENT: docker/logs
 .PHONY: docker/logs
 docker/logs:
+	mkdir -p build/; \
 	for demo in $(SERVICES); do \
 		name="$$(echo $$demo|cut -d/ -f2)"; \
 		echo "========== $$name =========="; \
-		docker compose logs --no-color "$$name"; \
+		docker compose logs --no-color "$$name"|tee "build/docker-$$name.log"; \
 		echo; \
 	done
 
