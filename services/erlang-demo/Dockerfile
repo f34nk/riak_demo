@@ -6,6 +6,7 @@ RUN apk add --no-cache git
 
 COPY rebar.config .
 COPY src src
+COPY generated generated
 
 RUN rebar3 compile
 
