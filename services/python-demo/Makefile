@@ -30,6 +30,10 @@ build: install-codegen
 .PHONY: demo
 demo: build
 
+.PHONY: test
+test:
+	@echo "No tests yet"
+
 .PHONY: clean
 clean:
 	#
