@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "outputDirectory": "build/smithy",
+  "outputDirectory": "generated",
   "sources": [
     "../../model/openriak-3.4.smithy"
   ],
