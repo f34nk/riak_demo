@@ -1,12 +1,13 @@
+import asyncio
 import json
 import os
-import time
 
-import requests
+from openriak.client import OpenRiakClient
+from openriak.config import Config
+from openriak.models import GetDefaultObjectInput, PutDefaultObjectInput
 
 RIAK_HOST = os.environ.get("RIAK_HOST", "openriak")
 RIAK_PORT = os.environ.get("RIAK_PORT", "8098")
-BASE_URL = f"http://{RIAK_HOST}:{RIAK_PORT}"
 
 BUCKET = "demo"
 KEY = "hello"
@@ -14,37 +15,47 @@ KEY = "hello"
 TEST_OBJECT = {
     "client": "python",
     "message": "Hello from OpenRiak",
-    "timestamp": time.time(),
 }
 
 
-def write_object(bucket: str, key: str, data: dict) -> None:
-    url = f"{BASE_URL}/buckets/{bucket}/keys/{key}?w=1&dw=1"
-    response = requests.put(
-        url,
-        data=json.dumps(data),
-        headers={"Content-Type": "application/json"},
-        timeout=10,
-    )
-    response.raise_for_status()
-    print(f"Wrote object -> bucket={bucket!r} key={key!r} status={response.status_code}")
-
-
-def read_object(bucket: str, key: str) -> dict:
-    url = f"{BASE_URL}/buckets/{bucket}/keys/{key}"
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    print(f"Read object  <- bucket={bucket!r} key={key!r} status={response.status_code}")
-    return response.json()
-
-
-def main() -> None:
+async def main() -> None:
+    endpoint = f"http://{RIAK_HOST}:{RIAK_PORT}"
     print("=== OpenRiak Python Demo ===")
-    print(f"Using OpenRiak at {BASE_URL}")
+    print(f"Using OpenRiak at {endpoint}")
 
-    write_object(BUCKET, KEY, TEST_OBJECT)
+    config = Config(endpoint_uri=endpoint)
+    client = OpenRiakClient(config)
 
-    result = read_object(BUCKET, KEY)
+    json_bytes = json.dumps(TEST_OBJECT).encode("utf-8")
+
+    put_output = await client.put_default_object(
+        PutDefaultObjectInput(
+            bucket=BUCKET,
+            key=KEY,
+            content_type="application/json",
+            w="1",
+            dw="1",
+            body=json_bytes,
+        )
+    )
+    print(
+        f"Wrote object -> bucket={BUCKET!r} key={KEY!r} "
+        f"status={put_output.status_code}"
+    )
+
+    get_output = await client.get_default_object(
+        GetDefaultObjectInput(
+            bucket=BUCKET,
+            key=KEY,
+        )
+    )
+    print(
+        f"Read object  <- bucket={BUCKET!r} key={KEY!r} "
+        f"status={get_output.status_code}"
+    )
+
+    body_bytes = await get_output.body.read()
+    result = json.loads(body_bytes.decode("utf-8"))
     print(f"Result: {json.dumps(result, indent=2)}")
 
     assert result["message"] == TEST_OBJECT["message"], "Value mismatch after read!"
@@ -52,4 +63,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -7,8 +7,13 @@ name = "riak-python-demo"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "requests>=2.32",
+    "openriak @ file:///${PROJECT_ROOT}/generated/client/python-client-codegen",
+    "smithy-core",
+    "smithy-http[aiohttp]",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
