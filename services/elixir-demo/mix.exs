@@ -6,13 +6,12 @@ defmodule RiakElixirDemo.MixProject do
       app: :riak_elixir_demo,
       version: "0.1.0",
       elixir: "~> 1.17",
-      start_permanent: false,
-      deps: deps(),
-      application: application()
+      start_permanent: Mix.env() == :prod,
+      deps: deps()
     ]
   end
 
-  defp application do
+  def application do
     [
       extra_applications: [:logger, :req],
       mod: {RiakElixirDemo.Application, []}
