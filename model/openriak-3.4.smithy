@@ -20,13 +20,20 @@ use smithy.api#streaming
 use smithy.api#Document
 use smithy.api#documentation
 use smithy.api#httpBasicAuth
+use smithy.api#protocolDefinition
 use smithy.api#suppress
+use smithy.api#trait
+
+@trait(selector: "service")
+@protocolDefinition
+structure openRiakHttp {}
 
 @documentation("""
 OpenRiak HTTP API for openriak-3.4. Routes and payloads are modeled with standard Smithy HTTP binding traits only (@http, @httpLabel, @httpQuery, @httpHeader, @httpPrefixHeaders, @httpPayload, @httpResponseCode, @httpError). There is no custom protocol trait and no stock restJson1-style envelope; clients must implement Riak wire details (x-riak- prefix headers, opaque object bodies, multipart siblings, quorum query strings) in application or custom runtime code.
 
 When Riak security is enabled, call the API over HTTPS with HTTP Basic credentials (@httpBasicAuth). Missing or invalid credentials yield 401 with a WWW-Authenticate challenge (Basic realm=\"Riak\"). Credentials sent over plain HTTP may yield 426 Upgrade Required.
 """)
+@openRiakHttp
 @httpBasicAuth
 service OpenRiak {
     version: "2026-05-06"
