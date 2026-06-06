@@ -36,3 +36,17 @@ get_default_object_request_test() ->
     ?assertEqual([], Request#http_request.headers),
     ?assertEqual(<<>>, Request#http_request.body),
     ok.
+
+get_default_object_response_test() ->
+    Response = #http_response{
+        status = 200,
+        headers = [
+            {<<"content-type">>, <<"application/json">>},
+            {<<"x-riak-vclock">>, <<"abc">>}
+        ],
+        body = <<"{\"message\":\"ok\"}">>
+    },
+    {ok, Output} = open_riak_open_riak_http:decode_get_default_object_response(Response),
+    ?assertEqual(200, Output#get_default_object_output.status_code),
+    ?assertEqual(#{<<"vclock">> => <<"abc">>}, Output#get_default_object_output.riak_headers),
+    ok.
