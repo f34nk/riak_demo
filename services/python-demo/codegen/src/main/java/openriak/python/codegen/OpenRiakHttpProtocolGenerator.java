@@ -48,12 +48,18 @@ public final class OpenRiakHttpProtocolGenerator implements ProtocolGenerator {
             writer.write("""
                     from typing import Any, Final
 
+                    from smithy_core import URI
                     from smithy_core.codecs import Codec
+                    from smithy_core.deserializers import DeserializeableShape
                     from smithy_core.exceptions import MissingDependencyError
+                    from smithy_core.interfaces import TypedProperties
                     from smithy_core.schemas import APIOperation, Schema
+                    from smithy_core.serializers import SerializeableShape
                     from smithy_core.shapes import ShapeID
                     from smithy_core.traits import HTTPErrorTrait
                     from smithy_core.types import TimestampFormat
+                    from smithy_http import Field
+                    from smithy_http.aio import HTTPRequest
                     from smithy_http.aio.interfaces import HTTPErrorIdentifier, HTTPResponse
                     from smithy_http.aio.protocols import HttpBindingClientProtocol
 
@@ -70,6 +76,17 @@ public final class OpenRiakHttpProtocolGenerator implements ProtocolGenerator {
                             raise MissingDependencyError(
                                 "Attempted to use JSON codec, but smithy-json is not installed."
                             )
+
+
+                    def _prefer_modeled_content_type(request: HTTPRequest) -> None:
+                        \"\"\"Keep one Content-Type when blob payload serde adds a duplicate value.\"\"\"
+                        for name in ("content-type", "Content-Type"):
+                            field = request.fields.get(name)
+                            if field is not None and len(field.values) > 1:
+                                request.fields.set_field(
+                                    Field(name=field.name, values=[field.values[0]])
+                                )
+                                return
 
 
                     class OpenRiakHttpErrorIdentifier(HTTPErrorIdentifier):
@@ -117,6 +134,26 @@ public final class OpenRiakHttpProtocolGenerator implements ProtocolGenerator {
                         @property
                         def error_identifier(self) -> HTTPErrorIdentifier:
                             return self._error_identifier
+
+                        def serialize_request[
+                            OperationInput: SerializeableShape,
+                            OperationOutput: DeserializeableShape,
+                        ](
+                            self,
+                            *,
+                            operation: APIOperation[OperationInput, OperationOutput],
+                            input: OperationInput,
+                            endpoint: URI,
+                            context: TypedProperties,
+                        ) -> HTTPRequest:
+                            request = super().serialize_request(
+                                operation=operation,
+                                input=input,
+                                endpoint=endpoint,
+                                context=context,
+                            )
+                            _prefer_modeled_content_type(request)
+                            return request
                     """);
         });
     }
