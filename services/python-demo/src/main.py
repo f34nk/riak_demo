@@ -6,6 +6,8 @@ from openriak.client import OpenRiak
 from openriak.config import Config
 from openriak.models import GetDefaultObjectOperationInput, PutDefaultObjectOperationInput
 
+# smithy-python-codegen generates an async-only client (aiohttp transport), so
+# operations and response bodies must be awaited via asyncio.run.
 RIAK_HOST = os.environ.get("RIAK_HOST", "openriak")
 RIAK_PORT = os.environ.get("RIAK_PORT", "8098")
 
