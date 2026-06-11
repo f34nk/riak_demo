@@ -6,6 +6,7 @@ RUN mix local.hex --force && mix local.rebar --force
 
 COPY mix.exs .
 COPY lib lib
+COPY generated generated
 
 ENV MIX_ENV=prod
 
