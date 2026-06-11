@@ -324,7 +324,7 @@ public final class ElixirOpenRiakHttpEmitter {
             if (member.getMemberName().equals("__beam_error_kind")) {
                 continue;
             }
-            fields.add(fieldNameFromMember(member) + ": nil");
+            fields.add(member.getMemberName() + ": nil");
         }
         return fields;
     }
@@ -379,6 +379,7 @@ public final class ElixirOpenRiakHttpEmitter {
         writer.write("");
         writer.write("defp uri_encode(value), do: URI.encode(to_string(value))");
         writer.write("");
+        writer.write("defp encode_query_value(nil), do: nil");
         writer.write("defp encode_query_value(true), do: \"true\"");
         writer.write("defp encode_query_value(false), do: \"false\"");
         writer.write("defp encode_query_value(value) when is_integer(value), do: Integer.to_string(value)");
