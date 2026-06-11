@@ -54,4 +54,4 @@ demo: build/mix
 
 .PHONY: clean
 clean:
-	rm -rf _build generated .smithy-beam build-errors.log $(OPENRIAK_CODEGEN_JAR)
+	rm -rf _build generated deps .smithy-beam *.dump build-errors.log $(OPENRIAK_CODEGEN_JAR)
