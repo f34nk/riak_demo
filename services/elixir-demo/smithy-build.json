@@ -7,7 +7,8 @@
   "maven": {
     "dependencies": [
       "io.smithy.beam:codegen-elixir:0.1.0-SNAPSHOT",
-      "software.amazon.smithy:smithy-aws-traits:1.54.0"
+      "software.amazon.smithy:smithy-aws-traits:1.54.0",
+      "openriak:openriak-elixir-codegen:0.1.0"
     ],
     "repositories": [
       {
