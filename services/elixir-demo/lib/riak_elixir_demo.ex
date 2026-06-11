@@ -1,6 +1,10 @@
 defmodule RiakElixirDemo do
   @moduledoc false
 
+  alias OpenRiakClient
+  alias OpenRiakTypes.PutDefaultObjectOperationInput
+  alias OpenRiakTypes.GetDefaultObjectOperationInput
+
   @bucket "demo"
   @key "hello-elixir"
 
@@ -13,12 +17,13 @@ defmodule RiakElixirDemo do
     riak_host = System.get_env("RIAK_HOST", "openriak")
     riak_port = System.get_env("RIAK_PORT", "8098")
     base_url = "http://#{riak_host}:#{riak_port}"
+    config = %{base_url: base_url}
 
     IO.puts("=== OpenRiak Elixir Demo ===")
     IO.puts("Using OpenRiak at #{base_url}")
 
-    write_object(base_url, @bucket, @key, @test_object)
-    result = read_object(base_url, @bucket, @key)
+    :ok = write_object(config, @bucket, @key, @test_object)
+    result = read_object(config, @bucket, @key)
 
     IO.puts("Result: #{Jason.encode!(result, pretty: true)}")
 
@@ -29,26 +34,47 @@ defmodule RiakElixirDemo do
     IO.puts("Demo complete: write and read verified.")
   end
 
-  defp write_object(base_url, bucket, key, data) do
-    url = "#{base_url}/buckets/#{bucket}/keys/#{key}?w=1&dw=1"
+  defp write_object(config, bucket, key, data) do
+    body = Jason.encode!(data)
 
-    %{status: status} =
-      Req.put!(url,
-        json: data,
-        headers: %{"content-type" => "application/json"},
-        receive_timeout: 10_000
-      )
+    input = %PutDefaultObjectOperationInput{
+      bucket: bucket,
+      key: key,
+      w: "1",
+      dw: "1",
+      content_type: "application/json",
+      body: body
+    }
 
-    IO.puts("Wrote object -> bucket='#{bucket}' key='#{key}' status=#{status}")
+    case OpenRiakClient.put_default_object(config, input) do
+      {:ok, %{status_code: status}} when status in 200..299 ->
+        IO.puts("Wrote object -> bucket='#{bucket}' key='#{key}' status=#{status}")
+        :ok
+
+      {:ok, %{status_code: status}} ->
+        raise "put failed with status #{status}"
+
+      {:error, reason} ->
+        raise inspect(reason)
+    end
   end
 
-  defp read_object(base_url, bucket, key) do
-    url = "#{base_url}/buckets/#{bucket}/keys/#{key}"
+  defp read_object(config, bucket, key) do
+    input = %GetDefaultObjectOperationInput{
+      bucket: bucket,
+      key: key
+    }
 
-    %{status: status, body: body} =
-      Req.get!(url, receive_timeout: 10_000)
+    case OpenRiakClient.get_default_object(config, input) do
+      {:ok, %{status_code: 200, body: body}} ->
+        IO.puts("Read object  <- bucket='#{bucket}' key='#{key}' status=200")
+        Jason.decode!(body)
 
-    IO.puts("Read object  <- bucket='#{bucket}' key='#{key}' status=#{status}")
-    body
+      {:ok, %{status_code: status}} ->
+        raise "get failed with status #{status}"
+
+      {:error, reason} ->
+        raise inspect(reason)
+    end
   end
 end
