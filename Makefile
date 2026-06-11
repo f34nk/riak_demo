@@ -119,7 +119,7 @@ _run:
 	rm -rf build/*.log
 	touch build/$(TARGET).log
 	#
-	# Run $(TARGET) in parallel ($(PARALLEL_JOBS) jobs)
+	# Build $(TARGET) in parallel ($(PARALLEL_JOBS) jobs)
 	#
 	find $(TARGET)/*/smithy-build.json -type f -maxdepth 1 -exec dirname {} \; |\
 	xargs -S1024 -P $(PARALLEL_JOBS) -I {} sh -c ' \
@@ -156,7 +156,7 @@ services/%: $(DEMOS)
 	name="$$(echo $$target|cut -d/ -f2)"; \
 	build_log=build/services.log; \
 	logfile="build/services-$$name.log"; \
-	echo "Running $$target > $$logfile"; \
+	echo "Building $$target > $$logfile"; \
 	DEMO=$$target make _build > $$logfile 2>&1; \
 	if grep -q "make.*Error" $$logfile; then \
 		echo "$$logfile ...failed" >> $$build_log; \
