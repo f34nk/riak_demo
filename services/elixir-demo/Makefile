@@ -33,7 +33,7 @@ $(OPENRIAK_CODEGEN_JAR): $(OPENRIAK_CODEGEN_SRCS)
 	cd codegen && JAVA_HOME="$(JDK21)" mvn -q install
 
 .PHONY: build/smithy
-build/smithy: install-codegen
+build/smithy: install-codegen install-openriak-codegen
 	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
 	rm -f build-errors.log
 
@@ -46,7 +46,7 @@ build: build/mix
 
 .PHONY: test
 test: build/mix
-	mix test
+	MIX_ENV=test mix test --no-start
 
 .PHONY: demo
 demo: build/mix
