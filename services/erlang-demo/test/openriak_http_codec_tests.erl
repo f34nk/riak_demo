@@ -56,6 +56,33 @@ run_default_bucket_query_request_test() ->
     ?assertMatch(<<"{", _/binary>>, Request#http_request.body),
     ok.
 
+get_default_bucket_query_results_request_test() ->
+    Input = #get_default_bucket_query_results_input{
+        bucket = <<"demo">>,
+        result_queue = <<"q-123">>,
+        max_results = 50
+    },
+    Request = openriak_http:encode_get_default_bucket_query_results_request(Input),
+    ?assertEqual(<<"GET">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/query">>, Request#http_request.path),
+    ?assertEqual(
+        #{<<"result_queue">> => <<"q-123">>, <<"max_results">> => <<"50">>},
+        Request#http_request.query
+    ),
+    ?assertEqual(<<>>, Request#http_request.body),
+    ok.
+
+run_default_bucket_query_response_test() ->
+    Response = #http_response{
+        status = 200,
+        headers = [{<<"content-type">>, <<"application/json">>}],
+        body = <<"{\"result_queue\":\"q-456\"}">>
+    },
+    {ok, Output} = openriak_http:decode_run_default_bucket_query_response(Response),
+    ?assertEqual(200, Output#run_default_bucket_query_output.status_code),
+    ?assertEqual(<<"{\"result_queue\":\"q-456\"}">>, Output#run_default_bucket_query_output.body),
+    ok.
+
 get_default_object_sibling_response_test() ->
     Response = #http_response{
         status = 300,
