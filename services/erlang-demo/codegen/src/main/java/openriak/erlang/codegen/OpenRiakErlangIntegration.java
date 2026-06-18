@@ -37,6 +37,7 @@ public final class OpenRiakErlangIntegration implements ErlangIntegration {
     public void customize(ErlangContext context) {
         if (OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP.equals(context.resolvedProtocolTraitId())) {
             ErlangOpenRiakHttpEmitter.emitCodecModule(context, context.service());
+            ErlangOpenRiakJsonEmitter.emitJsonModule(context, context.service());
         }
     }
 }

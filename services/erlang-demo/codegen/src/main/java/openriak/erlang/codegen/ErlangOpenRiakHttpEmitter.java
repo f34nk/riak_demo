@@ -11,6 +11,7 @@ import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.BlobShape;
+import software.amazon.smithy.model.shapes.DocumentShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -29,7 +30,7 @@ import java.util.Set;
 
 /**
  * openRiakHttp codec emitter for Erlang. HTTP framing follows smithy-beam REST helpers;
- * opaque {@code @httpPayload} bodies pass through without JSON document encoding.
+ * structure and document {@code @httpPayload} bodies are JSON-encoded via openriak_json.
  */
 public final class ErlangOpenRiakHttpEmitter {
 
@@ -353,6 +354,27 @@ public final class ErlangOpenRiakHttpEmitter {
             writer.indent();
             writer.write("undefined -> <<>>;");
             writer.write("Value -> Value");
+            writer.dedent();
+            writer.write("end,");
+            return;
+        }
+
+        if (target instanceof StructureShape structureShape) {
+            String recName = recordName(sp.toSymbol(structureShape));
+            writer.write("Body = case $L of", bindingVar);
+            writer.indent();
+            writer.write("undefined -> <<>>;");
+            writer.write("Value -> jsone:encode(openriak_json:encode_$L(Value))", recName);
+            writer.dedent();
+            writer.write("end,");
+            return;
+        }
+
+        if (target instanceof DocumentShape) {
+            writer.write("Body = case $L of", bindingVar);
+            writer.indent();
+            writer.write("undefined -> <<>>;");
+            writer.write("Value -> jsone:encode(Value)");
             writer.dedent();
             writer.write("end,");
             return;
