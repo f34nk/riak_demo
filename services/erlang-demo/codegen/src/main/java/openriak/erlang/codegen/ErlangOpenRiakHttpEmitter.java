@@ -81,18 +81,7 @@ public final class ErlangOpenRiakHttpEmitter {
     }
 
     public static void emitOperation(ErlangContext ctx, ServiceShape service, OperationShape operation) {
-        Model model = ctx.model();
-        HttpBindingIndex httpIndex = HttpBindingIndex.of(model);
-        SymbolProvider sp = ctx.symbolProvider();
-        BeamErlangLayout layout = new BeamErlangLayout(
-                ctx.settings(), service.getId().getNamespace(), service);
-        String codecFile = codecModuleName(layout) + ".erl";
-
-        ctx.writerDelegator().useFileWriter(codecFile, writer -> {
-            emitEncoder(writer, model, operation, httpIndex, sp);
-            emitDecoder(writer, model, operation, httpIndex, sp);
-            emitErrorDispatch(writer, model, operation, sp);
-        });
+        // Full codec module is emitted once in customize via emitCodecModule.
     }
 
     private static void emitEncoder(
@@ -310,7 +299,7 @@ public final class ErlangOpenRiakHttpEmitter {
             }
             writer.write("decode_$L_response_error($L, _Hdrs, Body) ->", opName, httpStatus);
             writer.indent();
-            List<String> fields = buildErrorFields(errShape);
+            List<String> fields = buildErrorFields(errShape, sp);
             if (fields.isEmpty()) {
                 writer.write("{error, #$L{}};", recName);
             } else {
@@ -326,13 +315,14 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.write("");
     }
 
-    private static List<String> buildErrorFields(StructureShape errShape) {
+    private static List<String> buildErrorFields(StructureShape errShape, SymbolProvider sp) {
         List<String> fields = new ArrayList<>();
         for (MemberShape member : errShape.members()) {
-            if (member.getMemberName().equals("__beam_error_kind")) {
+            String fieldName = memberFieldName(sp, member);
+            if (fieldName.equals("__beam_error_kind")) {
                 continue;
             }
-            fields.add(member.getMemberName() + " = undefined");
+            fields.add(fieldName + " = undefined");
         }
         return fields;
     }
