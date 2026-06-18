@@ -68,12 +68,24 @@ docker/down:
 .PHONY: docker/logs
 docker/logs:
 	mkdir -p build/; \
+	build_log=build/docker.log; \
+	rm -rf $$build_log; \
+	touch $$build_log; \
 	for demo in $(SERVICES); do \
 		name="$$(echo $$demo|cut -d/ -f2)"; \
+		logfile="build/docker-$$name.log"; \
 		echo "========== $$name =========="; \
-		docker compose logs --no-color "$$name"|tee "build/docker-$$name.log"; \
+		docker compose logs --no-color "$$name"|tee $$logfile; \
 		echo; \
-	done
+		if [ "$$name" != "openriak" ]; then \
+			if grep -q "Demo complete" $$logfile; then \
+				echo "$$logfile ...ok" >> $$build_log; \
+			else \
+				echo "$$logfile ...failed" >> $$build_log; \
+			fi; \
+		fi; \
+	done; \
+	cat $$build_log;
 
 .PHONY: clean
 clean:
@@ -149,7 +161,6 @@ services:
 	TARGET=services make _run
 
 # Usage: make services/python-demo
-.SILENT: $(DEMOS)
 .PHONY: $(DEMOS)
 services/%: $(DEMOS)
 	target="$@"; \
