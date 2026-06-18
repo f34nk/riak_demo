@@ -1,12 +1,12 @@
--module(riak_erlang_demo).
+-module(demo).
 -export([run/0]).
 
 -include("openriak_types.hrl").
 
 -define(BUCKET, <<"demo">>).
 -define(CLIENT, <<"erlang">>).
--define(QUERY_POLL_ATTEMPTS, 5).
--define(QUERY_POLL_INTERVAL_MS, 200).
+-define(QUERY_INDEX, <<"client_bin">>).
+-define(QUERY_INDEX_HEADER, <<"index-client_bin">>).
 -define(TEST_OBJECT, #{
     <<"client">> => <<"erlang">>,
     <<"message">> => <<"Hello from OpenRiak">>
@@ -64,12 +64,6 @@ assert_status_range(Label, Status) when Status >= 200, Status < 300 ->
 assert_status_range(Label, Status) ->
     error({Label, status_failed, Status}).
 
-parse_location_key(<<"/buckets/", Rest/binary>>) ->
-    case binary:split(Rest, <<"/keys/">>) of
-        [_Bucket, Key] -> Key;
-        _ -> error({invalid_location, Rest})
-    end.
-
 getenv(Key, Default) ->
     case os:getenv(Key) of
         false -> Default;
@@ -77,6 +71,9 @@ getenv(Key, Default) ->
     end.
 
 write_object(Config, Bucket, Key, Data) ->
+    write_object(Config, Bucket, Key, Data, undefined).
+
+write_object(Config, Bucket, Key, Data, RiakHeaders) ->
     Body = json_body(Data),
     Input = #put_default_object_operation_input{
         bucket = Bucket,
@@ -84,6 +81,7 @@ write_object(Config, Bucket, Key, Data) ->
         w = <<"1">>,
         dw = <<"1">>,
         content_type = <<"application/json">>,
+        riak_headers = RiakHeaders,
         body = Body
     },
     case openriak_client:put_default_object(Config, Input) of
@@ -118,62 +116,54 @@ read_object(Config, Bucket, Key) ->
 
 query_demo(Config) ->
     Key = unique_key(<<"query">>),
+    QueryTerm = Key,
     Object = #{<<"client">> => ?CLIENT, <<"message">> => <<"query seed">>},
-    ok = write_object(Config, ?BUCKET, Key, Object),
-    ok = run_keys_query(Config, ?BUCKET, Key),
-    io:format("Scenario query: keys index verified for ~s~n", [Key]),
+    IndexHeaders = #{?QUERY_INDEX_HEADER => QueryTerm},
+    ok = write_object(Config, ?BUCKET, Key, Object, IndexHeaders),
+    ok = run_index_query(Config, ?BUCKET, Key, QueryTerm),
+    io:format("Query demo: secondary index verified for ~s~n", [Key]),
     ok.
 
-run_keys_query(Config, Bucket, ExpectedKey) ->
+run_index_query(Config, Bucket, ExpectedKey, QueryTerm) ->
+    EndTerm = <<QueryTerm/binary, "~">>,
     Query = #bucket_query_request{
         query_list = [
-            #query_spec{index_name = <<"keys">>, start_term = <<>>, end_term = <<>>}
+            #query_spec{
+                index_name = ?QUERY_INDEX,
+                start_term = QueryTerm,
+                end_term = EndTerm
+            }
         ],
-        max_results = 50,
-        accumulation_option = <<"queue_raw_keys">>
+        accumulation_option = <<"keys">>
     },
     RunInput = #run_default_bucket_query_input{
         bucket = Bucket,
         content_type = <<"application/json">>,
         query = Query
     },
-    {ok, #run_default_bucket_query_output{status_code = 200, body = RunBodyRaw}} =
-        openriak_client:run_default_bucket_query(Config, RunInput),
-    RunBody = decode_json(RunBodyRaw),
-    Queue = maps:get(<<"result_queue">>, RunBody),
-    poll_query_results(Config, Bucket, Queue, ExpectedKey, ?QUERY_POLL_ATTEMPTS).
-
-poll_query_results(_Config, _Bucket, _Queue, _Key, 0) ->
-    error(query_key_not_found);
-poll_query_results(Config, Bucket, Queue, ExpectedKey, Attempts) ->
-    GetInput = #get_default_bucket_query_results_input{
-        bucket = Bucket,
-        result_queue = Queue,
-        max_results = 50
-    },
-    {ok, #get_default_bucket_query_results_output{status_code = 200, body = BodyRaw}} =
-        openriak_client:get_default_bucket_query_results(Config, GetInput),
-    Body = decode_json(BodyRaw),
-    case query_result_contains_key(Body, ExpectedKey) of
-        true ->
-            io:format("Query found key ~s~n", [ExpectedKey]),
-            ok;
-        false ->
-            case maps:get(<<"query_complete">>, Body, true) of
-                false ->
-                    timer:sleep(?QUERY_POLL_INTERVAL_MS),
-                    poll_query_results(Config, Bucket, Queue, ExpectedKey, Attempts - 1);
+    case openriak_client:run_default_bucket_query(Config, RunInput) of
+        {ok, #run_default_bucket_query_output{status_code = 200, body = RunBodyRaw}} ->
+            Body = decode_json(RunBodyRaw),
+            case query_result_contains_key(Body, ExpectedKey) of
                 true ->
+                    io:format("Query found key ~s~n", [ExpectedKey]),
+                    ok;
+                false ->
                     error({query_key_not_found, Body})
-            end
+            end;
+        {error, Reason} ->
+            error(Reason)
     end.
 
-decode_json(Bin) when is_binary(Bin) -> jsone:decode(Bin, [{return_maps, true}]);
+decode_json(Bin) when is_binary(Bin) -> jsone:decode(Bin);
 decode_json(Map) when is_map(Map) -> Map.
 
 query_result_contains_key(Body, ExpectedKey) ->
     Keys = maps:get(<<"keys">>, Body, maps:get(<<"results">>, Body, [])),
     lists:member(ExpectedKey, Keys)
-    orelse lists:any(fun(Entry) ->
-        maps:get(<<"key">>, Entry, undefined) =:= ExpectedKey
+    orelse lists:any(fun
+        (Entry) when is_map(Entry) ->
+            maps:get(<<"key">>, Entry, undefined) =:= ExpectedKey;
+        (_) ->
+            false
     end, Keys).
