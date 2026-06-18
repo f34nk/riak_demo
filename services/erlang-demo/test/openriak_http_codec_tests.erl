@@ -37,6 +37,25 @@ get_default_object_request_test() ->
     ?assertEqual(<<>>, Request#http_request.body),
     ok.
 
+run_default_bucket_query_request_test() ->
+    Query = #bucket_query_request{
+        query_list = [
+            #query_spec{index_name = <<"keys">>, start_term = <<>>, end_term = <<>>}
+        ],
+        max_results = 50,
+        accumulation_option = <<"queue_raw_keys">>
+    },
+    Input = #run_default_bucket_query_input{
+        bucket = <<"demo">>,
+        content_type = <<"application/json">>,
+        query = Query
+    },
+    Request = openriak_http:encode_run_default_bucket_query_request(Input),
+    ?assertEqual(<<"POST">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/query">>, Request#http_request.path),
+    ?assertMatch(<<"{", _/binary>>, Request#http_request.body),
+    ok.
+
 get_default_object_response_test() ->
     Response = #http_response{
         status = 200,
