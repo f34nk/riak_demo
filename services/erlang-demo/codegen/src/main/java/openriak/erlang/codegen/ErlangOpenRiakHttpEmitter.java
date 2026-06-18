@@ -122,9 +122,9 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.write("Path = $L,", pathExpr);
 
         if (queries.isEmpty()) {
-            writer.write("HttpQuery = [],");
+            writer.write("HttpQuery0 = [],");
         } else {
-            writer.write("HttpQuery = lists:filtermap(fun");
+            writer.write("HttpQuery0 = lists:filtermap(fun");
             for (HttpBinding qb : queries) {
                 String paramName = qb.getLocationName();
                 String fieldName = memberFieldName(sp, qb.getMember());
@@ -141,25 +141,29 @@ public final class ErlangOpenRiakHttpEmitter {
                             .orElse(""));
         }
 
-        for (HttpBinding qp : queryParams) {
-            String fieldName = memberFieldName(sp, qp.getMember());
-            String bindingVar = toBindingVar(fieldName);
-            writer.write("HttpQueryExtra = case $L of", bindingVar);
-            writer.indent();
-            writer.write("undefined -> [];");
-            writer.write("M when is_map(M) ->");
-            writer.indent();
-            writer.write("[{K, V} || {K, V} <- maps:to_list(M)]");
-            writer.dedent();
-            writer.dedent();
-            writer.write("end,");
-            writer.write("HttpQuery = HttpQuery ++ HttpQueryExtra,");
+        if (queryParams.isEmpty()) {
+            writer.write("HttpQuery = HttpQuery0,");
+        } else {
+            for (HttpBinding qp : queryParams) {
+                String fieldName = memberFieldName(sp, qp.getMember());
+                String bindingVar = toBindingVar(fieldName);
+                writer.write("HttpQueryExtra = case $L of", bindingVar);
+                writer.indent();
+                writer.write("undefined -> [];");
+                writer.write("M when is_map(M) ->");
+                writer.indent();
+                writer.write("[{K, V} || {K, V} <- maps:to_list(M)]");
+                writer.dedent();
+                writer.dedent();
+                writer.write("end,");
+            }
+            writer.write("HttpQuery = HttpQuery0 ++ HttpQueryExtra,");
         }
 
         if (headers.isEmpty()) {
-            writer.write("Headers = [],");
+            writer.write("Headers0 = [],");
         } else {
-            writer.write("Headers = lists:filtermap(fun");
+            writer.write("Headers0 = lists:filtermap(fun");
             for (HttpBinding hb : headers) {
                 String headerName = hb.getLocationName();
                 String fieldName = memberFieldName(sp, hb.getMember());
@@ -176,11 +180,16 @@ public final class ErlangOpenRiakHttpEmitter {
                             .orElse(""));
         }
 
-        for (HttpBinding ph : prefixHeaders) {
-            String fieldName = memberFieldName(sp, ph.getMember());
-            String prefix = ph.getLocationName();
-            writer.write("Headers = Headers ++ prefix_headers_to_list(<<\"$L\">>, $L),",
-                    prefix, toBindingVar(fieldName));
+        if (prefixHeaders.isEmpty()) {
+            writer.write("Headers = Headers0,");
+        } else {
+            writer.write("Headers = Headers0");
+            for (HttpBinding ph : prefixHeaders) {
+                String fieldName = memberFieldName(sp, ph.getMember());
+                String prefix = ph.getLocationName();
+                writer.write(" ++ prefix_headers_to_list(<<\"$L\">>, $L)", prefix, toBindingVar(fieldName));
+            }
+            writer.write(",");
         }
 
         emitOpaqueRequestBody(writer, model, reqPayload, method, sp);
