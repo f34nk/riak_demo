@@ -39,6 +39,7 @@ build/smithy: install-codegen install-openriak-codegen
 
 .PHONY: build/mix
 build/mix: build/smithy
+	mix deps.get
 	mix compile
 
 .PHONY: build
