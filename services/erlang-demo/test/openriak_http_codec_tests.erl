@@ -1,6 +1,6 @@
 -module(openriak_http_codec_tests).
 -include_lib("eunit/include/eunit.hrl").
--include("open_riak_types.hrl").
+-include("openriak_types.hrl").
 -include("runtime_types.hrl").
 
 put_default_object_request_test() ->
@@ -13,7 +13,7 @@ put_default_object_request_test() ->
         content_type = <<"application/json">>,
         body = Body
     },
-    Request = open_riak_open_riak_http:encode_put_default_object_request(Input),
+    Request = openriak_openriak_http:encode_put_default_object_request(Input),
     ?assertEqual(<<"PUT">>, Request#http_request.method),
     ?assertEqual(<<"/buckets/demo/keys/hello-erlang">>, Request#http_request.path),
     ?assertEqual(#{<<"w">> => <<"1">>, <<"dw">> => <<"1">>}, Request#http_request.query),
@@ -29,7 +29,7 @@ get_default_object_request_test() ->
         bucket = <<"demo">>,
         key = <<"hello-erlang">>
     },
-    Request = open_riak_open_riak_http:encode_get_default_object_request(Input),
+    Request = openriak_openriak_http:encode_get_default_object_request(Input),
     ?assertEqual(<<"GET">>, Request#http_request.method),
     ?assertEqual(<<"/buckets/demo/keys/hello-erlang">>, Request#http_request.path),
     ?assertEqual(#{}, Request#http_request.query),
@@ -46,7 +46,7 @@ get_default_object_response_test() ->
         ],
         body = <<"{\"message\":\"ok\"}">>
     },
-    {ok, Output} = open_riak_open_riak_http:decode_get_default_object_response(Response),
+    {ok, Output} = openriak_openriak_http:decode_get_default_object_response(Response),
     ?assertEqual(200, Output#get_default_object_output.status_code),
     ?assertEqual(#{<<"vclock">> => <<"abc">>}, Output#get_default_object_output.riak_headers),
     ok.

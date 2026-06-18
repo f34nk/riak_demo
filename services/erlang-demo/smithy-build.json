@@ -23,7 +23,8 @@
     "erlang-client-codegen": {
       "service": "openriak.v3_4.api#OpenRiak",
       "edition": "2026",
-      "protocol": "openriak.v3_4.api#openRiakHttp"
+      "protocol": "openriak.v3_4.api#openRiakHttp",
+      "name": "openriak"
     }
   }
 }

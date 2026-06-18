@@ -1,7 +1,7 @@
 -module(riak_erlang_demo).
 -export([run/0]).
 
--include("open_riak_types.hrl").
+-include("openriak_types.hrl").
 
 -define(BUCKET, <<"demo">>).
 -define(KEY, <<"hello-erlang">>).
@@ -49,7 +49,7 @@ write_object(Config, Bucket, Key, Data) ->
         content_type = <<"application/json">>,
         body = Body
     },
-    case open_riak_client:put_default_object(Config, Input) of
+    case openriak_client:put_default_object(Config, Input) of
         {ok, #put_default_object_output{status_code = Status}}
             when Status >= 200, Status < 300 ->
             io:format(
@@ -68,7 +68,7 @@ read_object(Config, Bucket, Key) ->
         bucket = Bucket,
         key = Key
     },
-    case open_riak_client:get_default_object(Config, Input) of
+    case openriak_client:get_default_object(Config, Input) of
         {ok, #get_default_object_output{status_code = 200, body = Body}} ->
             io:format(
                 "Read object  <- bucket='~s' key='~s' status=200~n",
