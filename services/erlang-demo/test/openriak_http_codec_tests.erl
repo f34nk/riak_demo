@@ -56,6 +56,20 @@ run_default_bucket_query_request_test() ->
     ?assertMatch(<<"{", _/binary>>, Request#http_request.body),
     ok.
 
+get_default_object_sibling_response_test() ->
+    Response = #http_response{
+        status = 300,
+        headers = [
+            {<<"content-type">>, <<"text/plain">>},
+            {<<"x-riak-vclock">>, <<"vc1">>}
+        ],
+        body = <<"sibling-vtags-list">>
+    },
+    {error, Err} = openriak_http:decode_get_default_object_response(Response),
+    ?assertMatch(#multiple_choices_error{}, Err),
+    ?assertEqual(<<"sibling-vtags-list">>, Err#multiple_choices_error.body),
+    ok.
+
 get_default_object_response_test() ->
     Response = #http_response{
         status = 200,

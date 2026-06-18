@@ -19,6 +19,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.HttpHeaderTrait;
+import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -298,7 +300,7 @@ public final class ErlangOpenRiakHttpEmitter {
             if (httpStatus <= 0) {
                 continue;
             }
-            writer.write("decode_$L_response_error($L, _Hdrs, Body) ->", opName, httpStatus);
+            writer.write("decode_$L_response_error($L, Hdrs, Body) ->", opName, httpStatus);
             writer.indent();
             List<String> fields = buildErrorFields(errShape, sp);
             if (fields.isEmpty()) {
@@ -323,7 +325,14 @@ public final class ErlangOpenRiakHttpEmitter {
             if (fieldName.equals("__beam_error_kind")) {
                 continue;
             }
-            fields.add(fieldName + " = undefined");
+            if (member.hasTrait(HttpHeaderTrait.class)) {
+                String headerName = member.expectTrait(HttpHeaderTrait.class).getValue();
+                fields.add(fieldName + " = proplists:get_value(<<\"" + headerName + "\">>, Hdrs, undefined)");
+            } else if (member.hasTrait(HttpPayloadTrait.class)) {
+                fields.add(fieldName + " = Body");
+            } else {
+                fields.add(fieldName + " = undefined");
+            }
         }
         return fields;
     }
