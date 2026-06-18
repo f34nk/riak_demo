@@ -21,10 +21,20 @@ run() ->
     io:format("=== OpenRiak Erlang Demo ===~n"),
     io:format("Using OpenRiak at ~s~n", [BaseUrl]),
 
+    ok = ping(Config),
     ok = baseline_kv_demo(Config),
 
     io:format("Demo complete: write and read verified.~n"),
     ok.
+
+ping(Config) ->
+    case openriak_client:ping(Config, #ping_input{}) of
+        {ok, #ping_output{status_code = 200, body = <<"OK">>}} ->
+            io:format("Ping OK~n"),
+            ok;
+        Other ->
+            error({ping_failed, Other})
+    end.
 
 baseline_kv_demo(Config) ->
     Key = unique_key(<<"hello">>),
