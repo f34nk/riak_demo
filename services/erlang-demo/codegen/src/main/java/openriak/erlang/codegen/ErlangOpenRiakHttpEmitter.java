@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public final class ErlangOpenRiakHttpEmitter {
 
-    public static final String CODEC_SUFFIX = "open_riak_http";
+    public static final String CODEC_SUFFIX = "http";
 
     private ErlangOpenRiakHttpEmitter() {}
 
@@ -64,7 +64,7 @@ public final class ErlangOpenRiakHttpEmitter {
             writer.write("-module($L).", codecModule);
             writer.write("-include(\"$L\").", layout.typesHeaderFile());
             writer.write("-include(\"$L\").", layout.runtimeTypesHeaderFile());
-            writer.write("-export([$L]).", String.join(", ", exports));
+            writer.write("-export([$L]).", String.join(",\n    ", exports));
             writer.write("");
 
             for (OperationShape op : operations) {
