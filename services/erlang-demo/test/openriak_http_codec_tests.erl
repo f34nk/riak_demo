@@ -24,6 +24,28 @@ put_default_object_request_test() ->
     ?assertEqual(Body, Request#http_request.body),
     ok.
 
+put_default_object_index_headers_request_test() ->
+    Body = <<"{\"client\":\"erlang\",\"message\":\"query seed\"}">>,
+    Input = #put_default_object_operation_input{
+        bucket = <<"demo">>,
+        key = <<"query-erlang-1">>,
+        w = <<"1">>,
+        dw = <<"1">>,
+        content_type = <<"application/json">>,
+        riak_headers = #{<<"index-client_bin">> => <<"query-erlang-1">>},
+        body = Body
+    },
+    Request = openriak_http:encode_put_default_object_request(Input),
+    ?assertEqual(<<"PUT">>, Request#http_request.method),
+    ?assertEqual(
+        [
+            {<<"Content-Type">>, <<"application/json">>},
+            {<<"x-riak-index-client_bin">>, <<"query-erlang-1">>}
+        ],
+        Request#http_request.headers
+    ),
+    ok.
+
 get_default_object_request_test() ->
     Input = #get_default_object_operation_input{
         bucket = <<"demo">>,
@@ -40,10 +62,13 @@ get_default_object_request_test() ->
 run_default_bucket_query_request_test() ->
     Query = #bucket_query_request{
         query_list = [
-            #query_spec{index_name = <<"keys">>, start_term = <<>>, end_term = <<>>}
+            #query_spec{
+                index_name = <<"client_bin">>,
+                start_term = <<"query-erlang-1">>,
+                end_term = <<"query-erlang-1~">>
+            }
         ],
-        max_results = 50,
-        accumulation_option = <<"queue_raw_keys">>
+        accumulation_option = <<"keys">>
     },
     Input = #run_default_bucket_query_input{
         bucket = <<"demo">>,
@@ -76,11 +101,11 @@ run_default_bucket_query_response_test() ->
     Response = #http_response{
         status = 200,
         headers = [{<<"content-type">>, <<"application/json">>}],
-        body = <<"{\"result_queue\":\"q-456\"}">>
+        body = <<"{\"keys\":[\"query-erlang-1\"]}">>
     },
     {ok, Output} = openriak_http:decode_run_default_bucket_query_response(Response),
     ?assertEqual(200, Output#run_default_bucket_query_output.status_code),
-    ?assertEqual(<<"{\"result_queue\":\"q-456\"}">>, Output#run_default_bucket_query_output.body),
+    ?assertEqual(<<"{\"keys\":[\"query-erlang-1\"]}">>, Output#run_default_bucket_query_output.body),
     ok.
 
 get_default_object_sibling_response_test() ->
