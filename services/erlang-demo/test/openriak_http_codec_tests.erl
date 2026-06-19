@@ -161,3 +161,23 @@ delete_default_object_request_test() ->
     ?assertEqual(#{<<"rw">> => <<"1">>}, Request#http_request.query),
     ?assertEqual(<<>>, Request#http_request.body),
     ok.
+
+create_default_object_request_test() ->
+    Body = <<"{\"client\":\"erlang\",\"message\":\"server-assigned key\"}">>,
+    Input = #create_default_object_operation_input{
+        bucket = <<"demo">>,
+        w = <<"1">>,
+        dw = <<"1">>,
+        content_type = <<"application/json">>,
+        body = Body
+    },
+    Request = openriak_http:encode_create_default_object_request(Input),
+    ?assertEqual(<<"POST">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/keys">>, Request#http_request.path),
+    ?assertEqual(#{<<"w">> => <<"1">>, <<"dw">> => <<"1">>}, Request#http_request.query),
+    ?assertEqual(
+        [{<<"Content-Type">>, <<"application/json">>}],
+        Request#http_request.headers
+    ),
+    ?assertEqual(Body, Request#http_request.body),
+    ok.
