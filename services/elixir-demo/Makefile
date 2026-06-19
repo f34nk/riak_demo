@@ -50,7 +50,7 @@ test: build/mix
 	MIX_ENV=test mix test --no-start
 
 .PHONY: demo
-demo: build/mix
+demo: build
 	mix run --no-start
 
 .PHONY: clean
