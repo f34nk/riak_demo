@@ -1,7 +1,7 @@
 defmodule OpenriakHttpCodecTest do
   use ExUnit.Case, async: true
 
-  alias OpenRiakOpenRiakHttp
+  alias OpenRiakHttp
   alias OpenRiakTypes.PutDefaultObjectOperationInput
   alias OpenRiakTypes.GetDefaultObjectOperationInput
   alias RuntimeTypes.HttpRequest
@@ -18,7 +18,7 @@ defmodule OpenriakHttpCodecTest do
       body: body
     }
 
-    req = OpenRiakOpenRiakHttp.encode_put_default_object_request(input)
+    req = OpenRiakHttp.encode_put_default_object_request(input)
 
     assert %HttpRequest{
              method: "PUT",
@@ -35,7 +35,7 @@ defmodule OpenriakHttpCodecTest do
       key: "hello-elixir"
     }
 
-    req = OpenRiakOpenRiakHttp.encode_get_default_object_request(input)
+    req = OpenRiakHttp.encode_get_default_object_request(input)
 
     assert %HttpRequest{
              method: "GET",
