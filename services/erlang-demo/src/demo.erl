@@ -25,6 +25,7 @@ run() ->
     ok = baseline_kv_demo(Config),
     ok = query_demo(Config),
     ok = lifecycle_demo(Config),
+    ok = server_assigned_key_demo(Config),
 
     io:format("Demo complete: write and read verified.~n"),
     ok.
@@ -65,6 +66,12 @@ assert_status_range(Label, Status) when Status >= 200, Status < 300 ->
 assert_status_range(Label, Status) ->
     error({Label, status_failed, Status}).
 
+parse_location_key(<<"/buckets/", Rest/binary>>) ->
+    case binary:split(Rest, <<"/keys/">>) of
+        [_Bucket, Key] -> Key;
+        _ -> error({invalid_location, Rest})
+    end.
+
 getenv(Key, Default) ->
     case os:getenv(Key) of
         false -> Default;
@@ -95,6 +102,25 @@ write_object(Config, Bucket, Key, Data, RiakHeaders) ->
             ok;
         {error, Reason} ->
             error(Reason)
+    end.
+
+create_object(Config, Bucket, Data) ->
+    Body = json_body(Data),
+    Input = #create_default_object_operation_input{
+        bucket = Bucket,
+        w = <<"1">>,
+        dw = <<"1">>,
+        content_type = <<"application/json">>,
+        body = Body
+    },
+    case openriak_client:create_default_object(Config, Input) of
+        {ok, #create_default_object_output{status_code = 201, location = Loc}}
+            when Loc =/= undefined ->
+            Key = parse_location_key(Loc),
+            io:format("Created object -> location=~s key=~s~n", [Loc, Key]),
+            {ok, Key};
+        Other ->
+            error({create_failed, Other})
     end.
 
 read_object(Config, Bucket, Key) ->
@@ -153,6 +179,18 @@ read_object_expect(Config, Bucket, Key, Expect) ->
             ok;
         Other ->
             error({read_expect_failed, Expect, Other})
+    end.
+
+server_assigned_key_demo(Config) ->
+    Object = #{<<"client">> => ?CLIENT, <<"message">> => <<"server-assigned key">>},
+    {ok, Key} = create_object(Config, ?BUCKET, Object),
+    Result = read_object(Config, ?BUCKET, Key),
+    case maps:get(<<"message">>, Result) of
+        <<"server-assigned key">> ->
+            io:format("Create demo: server key ~s verified~n", [Key]),
+            ok;
+        _ ->
+            error(create_value_mismatch)
     end.
 
 lifecycle_demo(Config) ->
