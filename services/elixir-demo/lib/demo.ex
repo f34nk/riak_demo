@@ -1,4 +1,4 @@
-defmodule RiakElixirDemo do
+defmodule Demo do
   @moduledoc false
 
   alias OpenRiakClient

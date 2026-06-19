@@ -1,4 +1,4 @@
-defmodule RiakElixirDemo.MixProject do
+defmodule Demo.MixProject do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule RiakElixirDemo.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {RiakElixirDemo.Application, []}
+      mod: {Demo.Application, []}
     ]
   end
 

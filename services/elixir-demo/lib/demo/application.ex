@@ -1,11 +1,11 @@
-defmodule RiakElixirDemo.Application do
+defmodule Demo.Application do
   @moduledoc false
   use Application
 
   @impl true
   def start(_type, _args) do
     try do
-      RiakElixirDemo.run()
+      Demo.run()
       System.halt(0)
     rescue
       error ->
