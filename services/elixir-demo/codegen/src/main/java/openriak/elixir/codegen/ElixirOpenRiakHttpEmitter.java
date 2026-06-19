@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public final class ElixirOpenRiakHttpEmitter {
 
-    public static final String CODEC_SUFFIX = "open_riak_http";
+    public static final String CODEC_SUFFIX = "http";
 
     private ElixirOpenRiakHttpEmitter() {}
 
@@ -44,9 +44,11 @@ public final class ElixirOpenRiakHttpEmitter {
                 ctx.settings(), service.getId().getNamespace(), service);
         HttpBindingIndex httpIndex = HttpBindingIndex.of(model);
         SymbolProvider sp = ctx.symbolProvider();
-        String codecFile = layout.clientCodecModuleName(OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP) + ".ex";
-        String moduleName = toModuleName(
-                layout.clientCodecModuleName(OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP));
+        String codecModuleSnake =
+                layout.clientCodecModuleName(
+                        OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP, ctx.integrations());
+        String codecFile = codecModuleSnake + ".ex";
+        String moduleName = toModuleName(codecModuleSnake);
         String runtimeMod = toModuleName(layout.runtimeTypesModuleName());
         String typesMod = toModuleName(layout.typesModuleName());
         List<OperationShape> operations = containedOperationsSorted(model, service);
