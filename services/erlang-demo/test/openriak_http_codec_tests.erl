@@ -181,3 +181,17 @@ create_default_object_request_test() ->
     ),
     ?assertEqual(Body, Request#http_request.body),
     ok.
+
+create_default_object_response_test() ->
+    Response = #http_response{
+        status = 201,
+        headers = [{<<"location">>, <<"/buckets/demo/keys/assigned-key">>}],
+        body = <<>>
+    },
+    {ok, Output} = openriak_http:decode_create_default_object_response(Response),
+    ?assertEqual(201, Output#create_default_object_output.status_code),
+    ?assertEqual(
+        <<"/buckets/demo/keys/assigned-key">>,
+        Output#create_default_object_output.location
+    ),
+    ok.

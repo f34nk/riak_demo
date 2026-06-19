@@ -241,7 +241,7 @@ public final class ErlangOpenRiakHttpEmitter {
             String fieldName = memberFieldName(sp, hb.getMember());
             String bindingVar = toBindingVar(fieldName);
             String headerName = hb.getLocationName();
-            writer.write("$L = proplists:get_value(<<\"$L\">>, Headers, undefined),",
+            writer.write("$L = header_value(Headers, <<\"$L\">>),",
                     bindingVar, headerName);
         }
 
@@ -336,7 +336,7 @@ public final class ErlangOpenRiakHttpEmitter {
             }
             if (member.hasTrait(HttpHeaderTrait.class)) {
                 String headerName = member.expectTrait(HttpHeaderTrait.class).getValue();
-                fields.add(fieldName + " = proplists:get_value(<<\"" + headerName + "\">>, Hdrs, undefined)");
+                fields.add(fieldName + " = header_value(Hdrs, <<\"" + headerName + "\">>)");
             } else if (member.hasTrait(HttpPayloadTrait.class)) {
                 fields.add(fieldName + " = Body");
             } else {
@@ -436,6 +436,15 @@ public final class ErlangOpenRiakHttpEmitter {
         writer.write("    [];");
         writer.write("prefix_headers_to_list(Prefix, Map) when is_map(Map) ->");
         writer.write("    [{<<Prefix/binary, H/binary>>, to_binary(V)} || {H, V} <- maps:to_list(Map)].");
+        writer.write("");
+        writer.write("header_value(Headers, Name) ->");
+        writer.write("    case proplists:get_value(Name, Headers, undefined) of");
+        writer.write("        undefined ->");
+        writer.write("            Lower = list_to_binary(string:lowercase(binary_to_list(Name))),");
+        writer.write("            proplists:get_value(Lower, Headers, undefined);");
+        writer.write("        Value ->");
+        writer.write("            Value");
+        writer.write("    end.");
         writer.write("");
         writer.write("prefix_headers_from_list(Headers, Prefix) ->");
         writer.write("    Map = maps:from_list([");
