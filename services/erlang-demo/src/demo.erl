@@ -147,7 +147,7 @@ read_object_expect(Config, Bucket, Key, Expect) ->
     Input = #get_default_object_operation_input{bucket = Bucket, key = Key},
     case openriak_client:get_default_object(Config, Input) of
         {ok, #get_default_object_output{status_code = 200, body = Body}} when Expect =:= ok ->
-            jsone:decode(Body, [{return_maps, true}]);
+            jsone:decode(Body);
         {error, #not_found_error{}} when Expect =:= not_found ->
             io:format("GET 404 confirmed -> ~s~n", [Key]),
             ok;
