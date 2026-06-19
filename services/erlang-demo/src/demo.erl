@@ -24,6 +24,7 @@ run() ->
     ok = ping(Config),
     ok = baseline_kv_demo(Config),
     ok = query_demo(Config),
+    ok = lifecycle_demo(Config),
 
     io:format("Demo complete: write and read verified.~n"),
     ok.
@@ -113,6 +114,62 @@ read_object(Config, Bucket, Key) ->
         {error, Reason} ->
             error(Reason)
     end.
+
+head_object(Config, Bucket, Key) ->
+    Input = #head_default_object_operation_input{
+        bucket = Bucket,
+        key = Key,
+        r = <<"1">>
+    },
+    case openriak_client:head_default_object(Config, Input) of
+        {ok, #head_default_object_output{status_code = 200}} ->
+            io:format("HEAD ok -> ~s~n", [Key]),
+            ok;
+        Other ->
+            error({head_failed, Other})
+    end.
+
+delete_object(Config, Bucket, Key) ->
+    Input = #delete_default_object_operation_input{
+        bucket = Bucket,
+        key = Key,
+        rw = <<"1">>
+    },
+    case openriak_client:delete_default_object(Config, Input) of
+        {ok, #delete_default_object_output{status_code = 204}} ->
+            io:format("DELETE ok -> ~s~n", [Key]),
+            ok;
+        Other ->
+            error({delete_failed, Other})
+    end.
+
+read_object_expect(Config, Bucket, Key, Expect) ->
+    Input = #get_default_object_operation_input{bucket = Bucket, key = Key},
+    case openriak_client:get_default_object(Config, Input) of
+        {ok, #get_default_object_output{status_code = 200, body = Body}} when Expect =:= ok ->
+            jsone:decode(Body, [{return_maps, true}]);
+        {error, #not_found_error{}} when Expect =:= not_found ->
+            io:format("GET 404 confirmed -> ~s~n", [Key]),
+            ok;
+        Other ->
+            error({read_expect_failed, Expect, Other})
+    end.
+
+lifecycle_demo(Config) ->
+    Key = unique_key(<<"lifecycle">>),
+    Object = #{<<"client">> => ?CLIENT, <<"message">> => <<"lifecycle">>},
+    ok = write_object(Config, ?BUCKET, Key, Object),
+    ok = head_object(Config, ?BUCKET, Key),
+    Result = read_object_expect(Config, ?BUCKET, Key, ok),
+    Expected = maps:get(<<"message">>, Object),
+    case maps:get(<<"message">>, Result) of
+        Expected -> ok;
+        _ -> error(lifecycle_value_mismatch)
+    end,
+    ok = delete_object(Config, ?BUCKET, Key),
+    ok = read_object_expect(Config, ?BUCKET, Key, not_found),
+    io:format("Scenario lifecycle: write head read delete verified~n"),
+    ok.
 
 query_demo(Config) ->
     Key = unique_key(<<"query">>),
