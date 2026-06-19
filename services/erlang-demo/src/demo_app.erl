@@ -1,11 +1,11 @@
--module(riak_erlang_demo_app).
+-module(demo_app).
 -behaviour(application).
 
 -export([start/2, stop/1]).
 
 start(_Type, _Args) ->
     try
-        ok = riak_erlang_demo:run(),
+        ok = demo:run(),
         {ok, self()}
     catch
         _Class:Reason ->
