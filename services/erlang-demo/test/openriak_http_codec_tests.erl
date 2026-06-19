@@ -135,3 +135,29 @@ get_default_object_response_test() ->
     ?assertEqual(200, Output#get_default_object_output.status_code),
     ?assertEqual(#{<<"vclock">> => <<"abc">>}, Output#get_default_object_output.riak_headers),
     ok.
+
+head_default_object_request_test() ->
+    Input = #head_default_object_operation_input{
+        bucket = <<"demo">>,
+        key = <<"lifecycle-erlang-1">>,
+        r = <<"1">>
+    },
+    Request = openriak_http:encode_head_default_object_request(Input),
+    ?assertEqual(<<"HEAD">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/keys/lifecycle-erlang-1">>, Request#http_request.path),
+    ?assertEqual(#{<<"r">> => <<"1">>}, Request#http_request.query),
+    ?assertEqual(<<>>, Request#http_request.body),
+    ok.
+
+delete_default_object_request_test() ->
+    Input = #delete_default_object_operation_input{
+        bucket = <<"demo">>,
+        key = <<"lifecycle-erlang-1">>,
+        rw = <<"1">>
+    },
+    Request = openriak_http:encode_delete_default_object_request(Input),
+    ?assertEqual(<<"DELETE">>, Request#http_request.method),
+    ?assertEqual(<<"/buckets/demo/keys/lifecycle-erlang-1">>, Request#http_request.path),
+    ?assertEqual(#{<<"rw">> => <<"1">>}, Request#http_request.query),
+    ?assertEqual(<<>>, Request#http_request.body),
+    ok.
