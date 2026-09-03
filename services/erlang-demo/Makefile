@@ -11,7 +11,6 @@ OPENRIAK_CODEGEN_JAR := $(HOME)/.m2/repository/openriak/openriak-erlang-codegen/
 OPENRIAK_CODEGEN_SRCS := $(shell find codegen/src codegen/pom.xml -type f 2>/dev/null)
 
 JDK21 := $(shell asdf where java openjdk-21)
-SMITHY_HOME := $(shell brew --prefix smithy-cli)/libexec
 
 .PHONY: all
 all: build
@@ -24,7 +23,7 @@ build/smithy: install-codegen install-openriak-codegen
 	#
 	# Build
 	#
-	JAVA_HOME="$(JDK21)" "$(JDK21)/bin/java" -XX:-UsePerfData -classpath "$(SMITHY_HOME)/lib/*" software.amazon.smithy.cli.SmithyCli build --config smithy-build.json 2>build-errors.log || (cat build-errors.log; exit 1)
+	smithy build 2>build-errors.log || (cat build-errors.log; exit 1)
 	rm -f build-errors.log
 
 .PHONY: build/rebar
