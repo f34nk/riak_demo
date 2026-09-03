@@ -40,16 +40,14 @@ public final class ErlangOpenRiakHttpEmitter {
 
     private ErlangOpenRiakHttpEmitter() {}
 
-    public static String codecModuleName(BeamErlangLayout layout) {
-        return layout.clientModuleName().replace("_client", "") + "_" + CODEC_SUFFIX;
-    }
-
     public static void emitCodecModule(ErlangContext ctx, ServiceShape service) {
         Model model = ctx.model();
         BeamErlangLayout layout = new BeamErlangLayout(
                 ctx.settings(), service.getId().getNamespace(), service);
-        String codecFile = codecModuleName(layout) + ".erl";
-        String codecModule = codecModuleName(layout);
+        String codecModule =
+                layout.codecModuleName(
+                        OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP, ctx.integrations());
+        String codecFile = codecModule + ".erl";
         HttpBindingIndex httpIndex = HttpBindingIndex.of(model);
         SymbolProvider sp = ctx.symbolProvider();
 
