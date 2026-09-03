@@ -45,7 +45,7 @@ public final class ElixirOpenRiakHttpEmitter {
         HttpBindingIndex httpIndex = HttpBindingIndex.of(model);
         SymbolProvider sp = ctx.symbolProvider();
         String codecModuleSnake =
-                layout.clientCodecModuleName(
+                layout.codecModuleName(
                         OpenRiakHttpProtocolCodegen.OPEN_RIAK_HTTP, ctx.integrations());
         String codecFile = codecModuleSnake + ".ex";
         String moduleName = toModuleName(codecModuleSnake);
